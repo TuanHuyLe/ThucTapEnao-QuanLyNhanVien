@@ -22,11 +22,11 @@ public class RoleEntity extends AuditableEntity<String> {
             CascadeType.PERSIST,
             CascadeType.MERGE
     })
-    @JoinTable(name = "RoleGroup",
+    @JoinTable(name = "UserRole",
             joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "group_id")
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<GroupEntity> groups = new HashSet<>();
+    private Set<UserEntity> users = new HashSet<>();
 
     //many to many permission
     @ManyToMany(cascade = {
@@ -38,6 +38,14 @@ public class RoleEntity extends AuditableEntity<String> {
             inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
     private Set<PermissionEntity> permissions = new HashSet<>();
+
+    public Set<UserEntity> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Set<UserEntity> users) {
+        this.users = users;
+    }
 
     public String getName() {
         return name;
@@ -53,14 +61,6 @@ public class RoleEntity extends AuditableEntity<String> {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Set<GroupEntity> getGroups() {
-        return groups;
-    }
-
-    public void setGroups(Set<GroupEntity> groups) {
-        this.groups = groups;
     }
 
     public Set<PermissionEntity> getPermissions() {

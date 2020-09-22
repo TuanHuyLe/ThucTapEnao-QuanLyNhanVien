@@ -16,10 +16,6 @@ public class GroupEntity extends AuditableEntity<String> {
     @Column
     private String description;
 
-    //many to many role
-    @ManyToMany(mappedBy = "groups")
-    private Set<RoleEntity> roles = new HashSet<>();
-
     //one to many user
     @OneToMany(
             mappedBy = "group",
@@ -29,12 +25,12 @@ public class GroupEntity extends AuditableEntity<String> {
     private Set<UserEntity> users = new HashSet<>();
 
     //getter and setter
-    public Set<RoleEntity> getRoles() {
-        return roles;
+    public Set<UserEntity> getUsers() {
+        return users;
     }
 
-    public void setRoles(Set<RoleEntity> roles) {
-        this.roles = roles;
+    public void setUsers(Set<UserEntity> users) {
+        this.users = users;
     }
 
     public String getName() {

@@ -31,6 +31,18 @@ public class UserEntity extends AuditableEntity<String> {
     @ManyToOne(fetch = FetchType.LAZY)
     private GroupEntity group;
 
+    //many to many role
+    @ManyToMany(mappedBy = "users")
+    private Set<RoleEntity> roles = new HashSet<>();
+
+    public Set<RoleEntity> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<RoleEntity> roles) {
+        this.roles = roles;
+    }
+
     public String getUsername() {
         return username;
     }
