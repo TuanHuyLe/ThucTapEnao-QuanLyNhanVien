@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResponseMessage {
-    private String message;
+public class GroupDTO extends AbstractDTO {
+    private String name;
+    private String description;
 }

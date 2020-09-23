@@ -1,5 +1,8 @@
 package com.enao.team2.quanlynhanvien.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
@@ -9,8 +12,10 @@ import java.util.Set;
 @Entity
 @Table(name = "roles")
 @Where(clause = "is_active=true")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class RoleEntity extends AuditableEntity<String> {
-
     @Column
     private String name;
 
@@ -38,36 +43,4 @@ public class RoleEntity extends AuditableEntity<String> {
             inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
     private Set<PermissionEntity> permissions = new HashSet<>();
-
-    public Set<UserEntity> getUsers() {
-        return users;
-    }
-
-    public void setUsers(Set<UserEntity> users) {
-        this.users = users;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Set<PermissionEntity> getPermissions() {
-        return permissions;
-    }
-
-    public void setPermissions(Set<PermissionEntity> permissions) {
-        this.permissions = permissions;
-    }
 }

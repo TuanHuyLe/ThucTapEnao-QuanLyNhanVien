@@ -1,4 +1,10 @@
 package com.enao.team2.quanlynhanvien.service;
 
+import com.enao.team2.quanlynhanvien.model.UserEntity;
+
+import java.util.List;
+
 public interface IUserService {
+    List<UserEntity> findAll();
+    UserEntity save(UserEntity userEntity);
 }
