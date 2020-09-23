@@ -8,7 +8,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "groups")
-@Where(clause = "is_active=1")
+@Where(clause = "is_active=true")
 public class GroupEntity extends AuditableEntity<String> {
     @Column
     private String name;

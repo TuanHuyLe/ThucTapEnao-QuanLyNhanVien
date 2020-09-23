@@ -8,7 +8,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "permissions")
-@Where(clause = "is_active=1")
+@Where(clause = "is_active=true")
 public class PermissionEntity extends AuditableEntity<String> {
 
     @Column

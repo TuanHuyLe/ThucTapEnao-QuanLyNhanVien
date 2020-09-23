@@ -1,5 +1,6 @@
 package com.enao.team2.quanlynhanvien.model;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -17,6 +18,11 @@ import java.util.UUID;
 public abstract class AuditableEntity<T> implements Serializable {
     @Id
     @Type(type = "uuid-char")
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
     @Column(name = "id", unique = true)
     private UUID id;
 
