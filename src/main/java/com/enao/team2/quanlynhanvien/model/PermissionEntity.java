@@ -1,18 +1,18 @@
 package com.enao.team2.quanlynhanvien.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "permissions")
 @Where(clause = "is_active=true")
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class PermissionEntity extends AuditableEntity<String> {
@@ -21,6 +21,9 @@ public class PermissionEntity extends AuditableEntity<String> {
 
     @Column
     private String description;
+
+    @Column
+    private UUID parent_id;
 
     //many to many role
     @ManyToMany(mappedBy = "permissions")

@@ -1,8 +1,6 @@
 package com.enao.team2.quanlynhanvien.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
@@ -12,7 +10,8 @@ import java.util.Set;
 @Entity
 @Table(name = "roles")
 @Where(clause = "is_active=true")
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class RoleEntity extends AuditableEntity<String> {
@@ -22,7 +21,7 @@ public class RoleEntity extends AuditableEntity<String> {
     @Column
     private String description;
 
-    //many to many group
+    //many to many users
     @ManyToMany(cascade = {
             CascadeType.PERSIST,
             CascadeType.MERGE
@@ -31,6 +30,7 @@ public class RoleEntity extends AuditableEntity<String> {
             joinColumns = @JoinColumn(name = "role_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
+    @Getter(AccessLevel.NONE)
     private Set<UserEntity> users = new HashSet<>();
 
     //many to many permission

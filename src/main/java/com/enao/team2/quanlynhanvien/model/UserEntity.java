@@ -1,19 +1,17 @@
 package com.enao.team2.quanlynhanvien.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "users")
 @Where(clause = "is_active=true")
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserEntity extends AuditableEntity<String> {
@@ -31,6 +29,9 @@ public class UserEntity extends AuditableEntity<String> {
 
     @Column
     private String email;
+
+    @Column
+    private String picture;
 
     //many to one group
     @ManyToOne(fetch = FetchType.LAZY)

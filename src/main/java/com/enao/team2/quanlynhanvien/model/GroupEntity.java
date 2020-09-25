@@ -1,8 +1,6 @@
 package com.enao.team2.quanlynhanvien.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
@@ -12,7 +10,8 @@ import java.util.Set;
 @Entity
 @Table(name = "groups")
 @Where(clause = "is_active=true")
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class GroupEntity extends AuditableEntity<String> {
