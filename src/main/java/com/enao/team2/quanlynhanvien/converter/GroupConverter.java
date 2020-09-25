@@ -2,6 +2,7 @@ package com.enao.team2.quanlynhanvien.converter;
 
 import com.enao.team2.quanlynhanvien.dto.GroupDTO;
 import com.enao.team2.quanlynhanvien.model.GroupEntity;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -10,7 +11,11 @@ import java.util.UUID;
 public class GroupConverter {
     public GroupEntity toEntity(GroupDTO groupDTO) {
         GroupEntity groupEntity = new GroupEntity();
-        groupEntity.setId(UUID.randomUUID());
+        if (groupDTO.getId() != null) {
+            groupEntity.setId(groupDTO.getId());
+        } else {
+            groupEntity.setId(UUID.randomUUID());
+        }
         groupEntity.setDescription(groupDTO.getDescription());
         groupEntity.setName(groupDTO.getName());
         if (groupDTO.getActive() != null) {
@@ -28,5 +33,10 @@ public class GroupConverter {
         groupDTO.setName(groupEntity.getName());
         groupDTO.setActive(groupEntity.getActive());
         return groupDTO;
+    }
+
+    public Page<GroupDTO> toPageDTO(Page<GroupEntity> pageEntity){
+        Page<GroupDTO> pageDTO = pageEntity.map(this::toDTO);
+        return pageDTO;
     }
 }
