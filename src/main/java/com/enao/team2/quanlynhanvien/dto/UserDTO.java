@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserDTO extends AbstractDTO {
     private String username;
-    private String password;
     private String fullName;
     private Boolean gender;
     private String email;
+    private String slug;
 }

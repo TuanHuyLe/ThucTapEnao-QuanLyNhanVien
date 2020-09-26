@@ -61,9 +61,9 @@ public class DatabaseSeeder {
             userDTO.setEmail("admin@gmail.com");
             userDTO.setFullName("admin");
             userDTO.setUsername("admin");
-            String salt = BCrypt.gensalt(12);
-            userDTO.setPassword(BCrypt.hashpw("admin", salt));
             UserEntity userEntity = userConverter.toEntity(userDTO);
+            String salt = BCrypt.gensalt(12);
+            userEntity.setPassword(BCrypt.hashpw("admin", salt));
             userEntity.setGroup(groupEntity.get());
             userService.save(userEntity);
         } else {

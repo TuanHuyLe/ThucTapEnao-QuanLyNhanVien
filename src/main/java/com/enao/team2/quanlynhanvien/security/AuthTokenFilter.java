@@ -38,16 +38,18 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
+            //get jwt from request
             String jwt = getJwtFromRequest(request);
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-                    String username = jwtUtils.getUsernameFromJwtToken(jwt);
-
+                //get username from jwt
+                String username = jwtUtils.getUsernameFromJwtToken(jwt);
+                //load user detail
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
+                //authenticate user
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
+                //set authenticate
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception e) {

@@ -33,29 +33,40 @@ public class AppAuthorizerImpl implements IAppAuthorizer {
     @Override
     public boolean authorize(Authentication authentication, String permission) {
         try {
+            //get user authenticated
             UsernamePasswordAuthenticationToken user = (UsernamePasswordAuthenticationToken) authentication;
+            //check user
             if (user == null) {
                 throw new UnauthorizedException(new MessageResponse("User not exists"));
             }
+            //get user detail
             UserDetailsImpl userDetails = (UserDetailsImpl) user.getPrincipal();
+            //check user authorities
             if (userDetails == null || userDetails.getAuthorities().size() == 0) {
                 throw new UnauthorizedException(new MessageResponse("User not exists authorities"));
             }
+            //get required permissions
             Optional<PermissionEntity> permissionEntity = permissionService.findByName(permission);
+            //check required permissions
             if (!permissionEntity.isPresent()) {
                 throw new UnauthorizedException(new MessageResponse("Permissions not exists"));
             }
-            //Nếu có quyền thì cho qua
+            //get role name of user from user detail
             List<String> rolesName = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
+            //create a set roles
             Set<RoleEntity> roleEntities = new HashSet<>();
+            //create a set permissions
             Set<PermissionEntity> permissionEntities = new HashSet<>();
+            //get roles from role name and append to set roles
             for (String roleName : rolesName) {
                 Optional<RoleEntity> role = roleService.findByName(roleName);
                 role.ifPresent(roleEntities::add);
             }
+            //get permissions from per role in set roles and append to set permissions
             for (RoleEntity role : roleEntities) {
                 permissionEntities.addAll(role.getPermissions());
             }
+            //check if set permissions contain required permissions
             if (!permissionEntities.contains(permissionEntity.get())){
                 throw new UnauthorizedException(new MessageResponse("Forbidden! Not permission"));
             }

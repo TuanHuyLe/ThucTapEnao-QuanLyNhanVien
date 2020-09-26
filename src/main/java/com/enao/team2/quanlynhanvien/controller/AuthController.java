@@ -28,9 +28,11 @@ public class AuthController {
     public ResponseEntity<?> authenticateUser(@RequestBody LoginDTO loginRequest) {
         String jwt;
         try {
+            //authenticate
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            //generate jwt
             jwt = jwtUtils.generateJwtToken(authentication);
         } catch (Exception e) {
             return new ResponseEntity<>(new MessageResponse("The username or password was not correct!"), HttpStatus.UNAUTHORIZED);

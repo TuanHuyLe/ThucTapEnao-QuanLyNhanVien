@@ -33,6 +33,9 @@ public class UserEntity extends AuditableEntity<String> {
     @Column
     private String picture;
 
+    @Column
+    private String slug;
+
     //many to one group
     @ManyToOne(fetch = FetchType.LAZY)
     private GroupEntity group;
