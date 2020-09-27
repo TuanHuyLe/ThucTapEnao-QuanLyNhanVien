@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/api/group")
+@RequestMapping("/api/group1")
 public class AdminController {
 
     @GetMapping("/list")

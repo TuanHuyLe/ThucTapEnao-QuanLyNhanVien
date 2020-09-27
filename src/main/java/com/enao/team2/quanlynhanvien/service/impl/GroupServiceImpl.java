@@ -4,6 +4,8 @@ import com.enao.team2.quanlynhanvien.model.GroupEntity;
 import com.enao.team2.quanlynhanvien.repository.IGroupRepository;
 import com.enao.team2.quanlynhanvien.service.IGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,8 +22,13 @@ public class GroupServiceImpl implements IGroupService {
     }
 
     @Override
+    @Cacheable(cacheNames = "groups", condition = "#is_active = true")
     public Optional<GroupEntity> findByName(String name) {
         return groupRepository.findByName(name);
+    }
+
+    @CacheEvict(cacheNames = "groups", allEntries = true)
+    public void flushCache() {
     }
 
     @Override

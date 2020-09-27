@@ -27,6 +27,12 @@ public class HomeController {
     @Autowired
     private UserConverter userConverter;
 
+    @GetMapping("/flush-cache")
+    public String flushCache() {
+        userService.flushCache();
+        return "Flush cache successfully";
+    }
+
     @GetMapping("/users")
     public ResponseEntity<?> home(
             @RequestParam(value = "keyword", required = false) String keyword,
