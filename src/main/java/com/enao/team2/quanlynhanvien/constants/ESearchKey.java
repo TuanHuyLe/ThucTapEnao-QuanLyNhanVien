@@ -4,4 +4,5 @@ public enum ESearchKey {
     username,
     slug,
     email,
+    name,
 }
