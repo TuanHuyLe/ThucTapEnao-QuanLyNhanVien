@@ -78,7 +78,7 @@ public class GroupController {
         GroupEntity entity = this.groupService.getOne(id);
         Optional<GroupEntity> name = this.groupService.findByName(dto.getName());
         ResponseMessage responseMessage = new ResponseMessage();
-        if (name.isPresent()){
+        if (name.isPresent() && (!dto.getName().equals(entity.getName()))){
             responseMessage.setMessage("Trùng tên");
             return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
         }
