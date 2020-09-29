@@ -43,4 +43,16 @@ public class UserEntity extends AuditableEntity<String> {
     //many to many role
     @ManyToMany(mappedBy = "users")
     private Set<RoleEntity> roles = new HashSet<>();
+
+    //override
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof UserEntity)) {
+            return false;
+        }
+        return null != getId() && getId().equals(((UserEntity) o).getId());
+    }
 }

@@ -27,6 +27,5 @@ public class GroupEntity extends AuditableEntity<String> {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    @Getter(AccessLevel.PRIVATE)
     private Set<UserEntity> users = new HashSet<>();
 }

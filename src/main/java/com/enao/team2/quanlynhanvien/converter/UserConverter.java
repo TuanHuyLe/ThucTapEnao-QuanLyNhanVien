@@ -22,12 +22,12 @@ public class UserConverter {
         userEntity.setEmail(userDTO.getEmail());
         userEntity.setGender(userDTO.getGender());
         userEntity.setSlug(slugUtils.slug(userDTO.getFullName()));
-        if (userDTO.getActive() != null) {
+        if (null != userDTO.getActive()) {
             userEntity.setActive(userDTO.getActive());
         } else {
             userEntity.setActive(true);
         }
-        if (userDTO.getGender() != null) {
+        if (null != userDTO.getGender()) {
             userEntity.setGender(userDTO.getGender());
         } else {
             userEntity.setGender(true);
@@ -44,6 +44,7 @@ public class UserConverter {
         userDTO.setGender(userEntity.getGender());
         userDTO.setActive(userEntity.getActive());
         userDTO.setSlug(userEntity.getSlug());
+        userDTO.setGroupName(userEntity.getGroup().getName());
         return userDTO;
     }
 }

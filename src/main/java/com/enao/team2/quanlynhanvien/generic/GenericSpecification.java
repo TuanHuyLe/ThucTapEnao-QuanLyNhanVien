@@ -39,6 +39,10 @@ public class GenericSpecification<T> implements Specification<T> {
 
         //add criteria to predicates
         for (SearchCriteria criteria : list) {
+            if (null != criteria.getChild()){
+                predicates.add(builder.like(builder.lower(root.get(criteria.getKey()).get(criteria.getChild())), "%" + criteria.getValue().toString().toLowerCase() + "%"));
+                continue;
+            }
             if (criteria.getOperation().equals(ESearchOperation.GREATER_THAN)) {
                 predicates.add(builder.greaterThan(root.get(criteria.getKey()), criteria.getValue().toString()));
             } else if (criteria.getOperation().equals(ESearchOperation.LESS_THAN)) {

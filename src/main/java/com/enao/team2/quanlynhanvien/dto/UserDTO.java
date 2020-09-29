@@ -13,4 +13,5 @@ public class UserDTO extends AbstractDTO {
     private Boolean gender;
     private String email;
     private String slug;
+    private String groupName;
 }

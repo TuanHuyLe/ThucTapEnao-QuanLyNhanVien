@@ -4,6 +4,7 @@ import com.enao.team2.quanlynhanvien.converter.UserConverter;
 import com.enao.team2.quanlynhanvien.dto.UserDTO;
 import com.enao.team2.quanlynhanvien.model.UserEntity;
 import com.enao.team2.quanlynhanvien.service.IUserService;
+import com.enao.team2.quanlynhanvien.utils.UserExcelExporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,10 +13,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -59,16 +61,33 @@ public class HomeController {
             usersPage = userService.findAll(pageable);
         }
         //response page
-        List<UserDTO> userDTOs = new ArrayList<>();
-        usersPage.forEach(x -> userDTOs.add(userConverter.toDTO(x)));
-        if (userDTOs.isEmpty()) {
+        if (usersPage.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
+        List<UserDTO> userDTOs = new ArrayList<>();
+        usersPage.forEach(x -> userDTOs.add(userConverter.toDTO(x)));
         Map<String, Object> response = new HashMap<>();
         response.put("totalPages", usersPage.getTotalPages());
         response.put("totalItems", usersPage.getTotalElements());
         response.put("currentPage", usersPage.getNumber() + 1);
         response.put("users", userDTOs);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/users/export/excel")
+    public void exportToExcel(HttpServletResponse response) throws IOException {
+        response.setContentType("application/octet-stream");
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+        String currentDateTime = dateFormatter.format(new Date());
+
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=users_" + currentDateTime + ".xlsx";
+        response.setHeader(headerKey, headerValue);
+
+        List<UserEntity> listUsers = userService.findAll();
+
+        UserExcelExporter excelExporter = new UserExcelExporter(listUsers);
+
+        excelExporter.export(response);
     }
 }

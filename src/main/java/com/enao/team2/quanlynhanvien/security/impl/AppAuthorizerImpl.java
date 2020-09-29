@@ -68,7 +68,7 @@ public class AppAuthorizerImpl implements IAppAuthorizer {
             }
             //check if set permissions contain required permissions
             if (!permissionEntities.contains(permissionEntity.get())){
-                throw new UnauthorizedException(new MessageResponse("Forbidden! Not permission"));
+                throw new UnauthorizedException(new MessageResponse("Not permission"));
             }
             return true;
         } catch (Exception e) {

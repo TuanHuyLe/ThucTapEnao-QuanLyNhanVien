@@ -14,4 +14,5 @@ public class SearchCriteria {
     private String key;
     private Object value;
     private ESearchOperation operation;
+    private String child;
 }

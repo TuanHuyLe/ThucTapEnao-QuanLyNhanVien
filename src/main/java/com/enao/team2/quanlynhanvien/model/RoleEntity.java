@@ -1,5 +1,6 @@
 package com.enao.team2.quanlynhanvien.model;
 
+import com.enao.team2.quanlynhanvien.constants.ERoles;
 import lombok.*;
 import org.hibernate.annotations.Where;
 

@@ -6,6 +6,7 @@ import com.enao.team2.quanlynhanvien.service.IGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,4 +36,10 @@ public class GroupServiceImpl implements IGroupService {
     public GroupEntity save(GroupEntity groupEntity) {
         return groupRepository.save(groupEntity);
     }
+
+    @Override
+    public List<GroupEntity> findByNameContaining(String name) {
+        return groupRepository.findByNameContaining(name);
+    }
+
 }
