@@ -98,6 +98,7 @@ public class GroupServiceImpl implements IGroupService {
         String slugKeyword = slugUtils.slug(keyword);
         GenericSpecification<GroupEntity> genericSpecification = new GenericSpecification<>();
         genericSpecification.add(new SearchCriteria(ESearchKey.name.name(), keyword, ESearchOperation.MATCH));
+        genericSpecification.add(new SearchCriteria(ESearchKey.slug.name(), slugKeyword, ESearchOperation.MATCH));
         return groupRepository.findAll(genericSpecification, pageable);
     }
 

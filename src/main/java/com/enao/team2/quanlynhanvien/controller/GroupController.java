@@ -1,8 +1,8 @@
 package com.enao.team2.quanlynhanvien.controller;
 
+import com.enao.team2.quanlynhanvien.constants.Constants;
 import com.enao.team2.quanlynhanvien.converter.GroupConverter;
 import com.enao.team2.quanlynhanvien.dto.GroupDTO;
-import com.enao.team2.quanlynhanvien.dto.UserDTO;
 import com.enao.team2.quanlynhanvien.messages.MessageResponse;
 import com.enao.team2.quanlynhanvien.model.GroupEntity;
 import com.enao.team2.quanlynhanvien.model.UserEntity;
@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -28,20 +29,12 @@ public class GroupController {
     @Autowired
     GroupConverter groupConverter;
 
-    @GetMapping("/groups")
-    public List<GroupDTO> listAll(){
-        List<GroupEntity> itr = this.groupService.findAll();
-        List<GroupDTO> list = new ArrayList();
-        itr.forEach(x -> list.add(groupConverter.toDTO(x)));
-        return list;
-    }
-
-    @GetMapping("/groupsPage")
-    public Page<GroupDTO> getList(@RequestParam(value = "page") int page, @RequestParam(value = "limit") int limit){
-        Page<GroupEntity> pag = this.groupService.getByPage(page, limit);
-        Page<GroupDTO> pagee = this.groupConverter.toPageDTO(pag);
-        return pagee;
-    }
+//    @GetMapping("/groups")
+//    public Page<GroupDTO> getList(@RequestParam(value = "page") int page, @RequestParam(value = "limit") int limit){
+//        Page<GroupEntity> pag = this.groupService.getByPage(page, limit);
+//        Page<GroupDTO> pagee = this.groupConverter.toPageDTO(pag);
+//        return pagee;
+//    }
 
     @GetMapping("/group/{id}")
     public ResponseEntity<GroupDTO> getOne(@PathVariable UUID id){
@@ -57,7 +50,7 @@ public class GroupController {
         return new ResponseEntity(dto, HttpStatus.OK);
     }
 
-    @PostMapping("/group")
+        @PostMapping("/group")
         public ResponseEntity<?> save(@RequestBody GroupDTO dto){
             GroupEntity entity = new GroupEntity();
             MessageResponse responseMessage = new MessageResponse();
@@ -98,7 +91,9 @@ public class GroupController {
         return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
     }
 
-    @GetMapping("/groupsSearch")
+    @GetMapping("/groups")
+//    @PreAuthorize("@appAuthorizer.authorize(authentication, \"" +
+//            Constants.PERMISSION_GROUP1 + "_" + Constants.PERMISSION_LIST + "\")")
     public ResponseEntity<?> search(
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "page", required = false, defaultValue = "1") String page,

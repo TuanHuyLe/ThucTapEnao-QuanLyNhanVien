@@ -21,6 +21,10 @@ public class GroupEntity extends AuditableEntity<String> {
     @Column
     private String description;
 
+    @Column
+    private String slug;
+
+
     //one to many user
     @OneToMany(
             mappedBy = "group",
