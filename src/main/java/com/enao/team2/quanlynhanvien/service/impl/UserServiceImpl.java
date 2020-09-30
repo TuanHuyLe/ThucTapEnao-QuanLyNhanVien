@@ -60,4 +60,9 @@ public class UserServiceImpl implements IUserService {
         genericSpecification.add(new SearchCriteria(ESearchKey.username.name(), keyword, ESearchOperation.MATCH, null));
         return userRepository.findAll(genericSpecification, pageable);
     }
+
+    @Override
+    public Optional<UserEntity> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
 }

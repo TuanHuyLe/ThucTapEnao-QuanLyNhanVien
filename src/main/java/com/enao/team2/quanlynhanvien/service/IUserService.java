@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IUserService {
     void flushCache();
@@ -16,4 +17,6 @@ public interface IUserService {
     UserEntity save(UserEntity userEntity);
 
     Page<UserEntity> findUsersWithPredicate(String keyword, Pageable pageable);
+
+    Optional<UserEntity> findByUsername(String username);
 }

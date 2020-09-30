@@ -14,12 +14,15 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class GroupEntity extends AuditableEntity<String> {
+public class GroupEntity extends AuditableEntity<UserEntity> {
     @Column
     private String name;
 
     @Column
     private String description;
+
+    @Column
+    private String slug;
 
     //one to many user
     @OneToMany(

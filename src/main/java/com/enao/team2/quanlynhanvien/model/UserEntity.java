@@ -14,7 +14,7 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserEntity extends AuditableEntity<String> {
+public class UserEntity extends AuditableEntity<UserEntity> {
     @Column(unique = true)
     private String username;
 

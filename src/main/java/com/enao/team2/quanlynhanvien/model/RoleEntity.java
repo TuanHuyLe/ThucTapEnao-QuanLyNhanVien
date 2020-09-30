@@ -15,7 +15,7 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RoleEntity extends AuditableEntity<String> {
+public class RoleEntity extends AuditableEntity<UserEntity> {
     @Column
     private String name;
 

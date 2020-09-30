@@ -2,15 +2,19 @@ package com.enao.team2.quanlynhanvien.converter;
 
 import com.enao.team2.quanlynhanvien.dto.GroupDTO;
 import com.enao.team2.quanlynhanvien.model.GroupEntity;
+import com.enao.team2.quanlynhanvien.utils.SlugUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 @Component
 public class GroupConverter {
+
+    @Autowired
+    private SlugUtils slugUtils;
+
     public GroupEntity toEntity(GroupDTO groupDTO) {
         GroupEntity groupEntity = new GroupEntity();
         if (groupDTO.getId() != null) {
@@ -20,7 +24,8 @@ public class GroupConverter {
         }
         groupEntity.setDescription(groupDTO.getDescription());
         groupEntity.setName(groupDTO.getName());
-        if (null != groupDTO.getActive()) {
+        groupEntity.setSlug(slugUtils.slug(groupDTO.getName()));
+        if (groupDTO.getActive() != null) {
             groupEntity.setActive(groupDTO.getActive());
         } else {
             groupEntity.setActive(true);
@@ -34,9 +39,7 @@ public class GroupConverter {
         groupDTO.setDescription(groupEntity.getDescription());
         groupDTO.setName(groupEntity.getName());
         groupDTO.setActive(groupEntity.getActive());
-        Set<String> usernames = new HashSet<>();
-        groupEntity.getUsers().forEach(x -> usernames.add(x.getUsername()));
-        groupDTO.setUserNames(usernames);
+        groupDTO.setSlug(groupEntity.getSlug());
         return groupDTO;
     }
 

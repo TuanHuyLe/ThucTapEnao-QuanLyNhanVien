@@ -15,7 +15,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PermissionEntity extends AuditableEntity<String> {
+public class PermissionEntity extends AuditableEntity<UserEntity> {
     @Column
     private String name;
 
