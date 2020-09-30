@@ -9,13 +9,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.Optional;
 import java.util.UUID;
 
-public class MyAuditorAware implements AuditorAware<UserEntity> {
+public class MyAuditorAware implements AuditorAware<UUID> {
     @Autowired
     private IUserService userService;
 
     @Override
-    public Optional<UserEntity> getCurrentAuditor() {
+    public Optional<UUID> getCurrentAuditor() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userService.findByUsername(username);
+        Optional<UserEntity> userEntity = userService.findByUsername(username);
+        UserEntity user = userEntity.get();
+        return Optional.of(user.getId());
     }
 }

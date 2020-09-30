@@ -7,6 +7,7 @@ import org.hibernate.annotations.Where;
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "roles")
@@ -15,7 +16,7 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RoleEntity extends AuditableEntity<UserEntity> {
+public class RoleEntity extends AuditableEntity<UUID> {
     @Column
     private String name;
 

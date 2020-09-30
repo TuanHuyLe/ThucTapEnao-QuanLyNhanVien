@@ -12,7 +12,7 @@ import java.util.UUID;
 @EnableJpaAuditing
 public class AuditorConfig {
     @Bean
-    public AuditorAware<UserEntity> auditorAware() {
+    public AuditorAware<UUID> auditorAware() {
         return new MyAuditorAware();
     }
 }
