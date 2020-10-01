@@ -65,22 +65,21 @@ public class GroupController {
         }
     }
 
-    @PutMapping("/group/{id}")
-    public ResponseEntity<?> update(@RequestBody GroupDTO dto, @PathVariable UUID id) {
-        GroupEntity entity = this.groupService.getOne(id);
-        Optional<GroupEntity> name = this.groupService.findByName(dto.getName());
+    @PutMapping("/group")
+    public ResponseEntity<?> update(@RequestBody GroupDTO dto) {
+        Optional<GroupEntity> entity1 = this.groupService.findById(dto.getId());
+        GroupEntity entity = entity1.get();
+        Optional<GroupEntity> name = this.groupService.findById(dto.getId());
         MessageResponse responseMessage = new MessageResponse();
         if (name.isPresent() && (!dto.getName().equals(entity.getName()))) {
             responseMessage.setMessage("Trùng tên");
             return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
         } else {
-            dto.setId(entity.getId());
-            dto.setActive(entity.getActive());
-            this.groupService.save(this.groupConverter.toEntity(dto));
+            System.out.println(dto);
+            this.groupService.save(groupConverter.toEntity(dto));
             responseMessage.setMessage("Sửa thành công!");
-            return new ResponseEntity(responseMessage.getMessage() + entity, HttpStatus.OK);
+            return new ResponseEntity(responseMessage.getMessage() + dto, HttpStatus.OK);
         }
-
     }
 
     @DeleteMapping("/group/{id}")
