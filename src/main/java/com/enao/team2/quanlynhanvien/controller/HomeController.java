@@ -4,14 +4,17 @@ import com.enao.team2.quanlynhanvien.converter.UserConverter;
 import com.enao.team2.quanlynhanvien.dto.UserDTO;
 import com.enao.team2.quanlynhanvien.model.UserEntity;
 import com.enao.team2.quanlynhanvien.service.IUserService;
-import com.enao.team2.quanlynhanvien.utils.UserExcelExporter;
+import com.enao.team2.quanlynhanvien.utils.excel.ExcelImporter;
+import com.enao.team2.quanlynhanvien.utils.excel.UserExcelExporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -74,6 +77,9 @@ public class HomeController {
         return ResponseEntity.ok(response);
     }
 
+    /*
+    export excel
+     */
     @GetMapping("/users/export/excel")
     public void exportToExcel(HttpServletResponse response) throws IOException {
         response.setContentType("application/octet-stream");
@@ -90,4 +96,15 @@ public class HomeController {
 
         excelExporter.export(response);
     }
+
+    /*
+    import excel
+     */
+    @GetMapping("/users/import/excel")
+    public ResponseEntity<List<UserDTO>> importFromExcel(@RequestParam("file") MultipartFile files) throws IOException {
+        ExcelImporter excelImporter = new ExcelImporter(files);
+        List<UserDTO> userDTOs = excelImporter.readBooksFromExcelFile();
+        return ResponseEntity.ok(userDTOs);
+    }
+
 }

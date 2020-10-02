@@ -39,5 +39,11 @@ public class AuthController {
         }
         return ResponseEntity.ok(new JwtResponse(jwt));
     }
+    
+    @GetMapping("/logout")
+    public String logout(){
+        SecurityContextHolder.clearContext();
+        return "logout success";
+    }
 
 }

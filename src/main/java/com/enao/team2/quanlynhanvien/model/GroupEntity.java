@@ -6,6 +6,7 @@ import org.hibernate.annotations.Where;
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "groups")
@@ -14,7 +15,7 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class GroupEntity extends AuditableEntity<UserEntity> {
+public class GroupEntity extends AuditableEntity<UUID> {
     @Column
     private String name;
 
