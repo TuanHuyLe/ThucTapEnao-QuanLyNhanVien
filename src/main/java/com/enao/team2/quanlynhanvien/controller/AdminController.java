@@ -13,8 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminController {
 
     @GetMapping("/list")
-    @PreAuthorize("@appAuthorizer.authorize(authentication, \"" +
-            Constants.PERMISSION_GROUP1 + "_" + Constants.PERMISSION_LIST + "\")")
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"list_group\" )")
     public String listGroup() {
         return "group";
     }

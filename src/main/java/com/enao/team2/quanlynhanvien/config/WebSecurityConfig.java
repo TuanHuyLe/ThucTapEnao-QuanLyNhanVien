@@ -56,6 +56,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/api/home/**").permitAll()
+                .antMatchers("/api/enao/action").permitAll()
+                .antMatchers("/api/enao/module").permitAll()
+                .antMatchers("/api/enao/permission").permitAll()
                 .anyRequest().authenticated();
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     }
