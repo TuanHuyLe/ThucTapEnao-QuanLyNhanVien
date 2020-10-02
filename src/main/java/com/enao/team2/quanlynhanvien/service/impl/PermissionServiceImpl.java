@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class PermissionServiceImpl implements IPermissionService {
@@ -22,5 +23,10 @@ public class PermissionServiceImpl implements IPermissionService {
     @Override
     public Optional<PermissionEntity> findByName(String name) {
         return permissionRepository.findByName(name);
+    }
+
+    @Override
+    public Optional<PermissionEntity> findById(UUID id) {
+        return permissionRepository.findById(id);
     }
 }

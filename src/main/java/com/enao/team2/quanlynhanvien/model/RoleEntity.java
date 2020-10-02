@@ -23,6 +23,9 @@ public class RoleEntity extends AuditableEntity<UUID> {
     @Column
     private String description;
 
+    @Column
+    private String slug;
+
     //many to many users
     @ManyToMany(cascade = {
             CascadeType.PERSIST,
