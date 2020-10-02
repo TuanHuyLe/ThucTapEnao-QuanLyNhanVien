@@ -15,17 +15,12 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-<<<<<<< HEAD
-public class PermissionEntity extends AuditableEntity<UUID> {
-    @Column
-=======
 @AllArgsConstructor
 public class PermissionEntity {
     @Id
     @Column(name = "code")
     private String code;
     @Column(name = "name")
->>>>>>> d6be2a2eef559f52c9c323b4146ff78b19952a68
     private String name;
     @ManyToOne(fetch = FetchType.LAZY)
     private Action action;
