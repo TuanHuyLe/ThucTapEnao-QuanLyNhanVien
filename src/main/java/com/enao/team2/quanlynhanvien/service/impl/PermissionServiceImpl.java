@@ -21,12 +21,7 @@ public class PermissionServiceImpl implements IPermissionService {
     }
 
     @Override
-    public Optional<PermissionEntity> findByName(String name) {
-        return permissionRepository.findByName(name);
-    }
-
-    @Override
-    public Optional<PermissionEntity> findById(UUID id) {
-        return permissionRepository.findById(id);
+    public Optional<PermissionEntity> findByCode(String code) {
+        return permissionRepository.findByCode(code);
     }
 }

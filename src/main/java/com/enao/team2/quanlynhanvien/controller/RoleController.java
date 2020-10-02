@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -34,6 +35,7 @@ public class RoleController {
     IPermissionService permissionService;
 
     @GetMapping("/roles")
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_ROLE\")")
     public List<RoleEntity> listAll() {
     List<RoleEntity> re = this.roleService.findAll();
     List<RoleDTO> list = new ArrayList();
@@ -42,6 +44,7 @@ public class RoleController {
     }
 
     @GetMapping("/rolesPage")
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_ROLE\")")
     public Page<RoleDTO> getList(@RequestParam(value = "page") int page, @RequestParam(value = "limit") int limit){
         Page<RoleEntity> pag = this.roleService.getByPage(page, limit);
         Page<RoleDTO> pagee = this.roleConverter.toPageDTO(pag);
@@ -49,6 +52,7 @@ public class RoleController {
     }
 
     @GetMapping("/role/{id}")
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_ROLE\")")
     public ResponseEntity<RoleDTO> getOne(@PathVariable UUID id){
         RoleDTO dto = new RoleDTO();
 //            ResponseMessage responseMessage = new ResponseMessage();
@@ -63,6 +67,7 @@ public class RoleController {
     }
 
     @PostMapping("/role")
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"ADD_ROLE\")")
     public ResponseEntity<?> save(@RequestBody RoleDTO dto) {
         RoleEntity entity = new RoleEntity();
         MessageResponse responseMessage = new MessageResponse();
@@ -79,6 +84,7 @@ public class RoleController {
     }
 
     @PutMapping("/role/{id}")
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"EDIT_ROLE\")")
     public ResponseEntity<?> update(@RequestBody RoleDTO dto, @PathVariable UUID id){
         RoleEntity entity = this.roleService.getOne(id);
         Optional<RoleEntity> name = this.roleService.findByName(dto.getName());
@@ -98,14 +104,14 @@ public class RoleController {
     }
 
     @DeleteMapping("/role/{id}")
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"REMOVE_ROLE\")")
     public ResponseEntity<MessageResponse> delete(@PathVariable(value = "id") UUID id){
         MessageResponse responseMessage = this.roleService.delete(id);
         return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
     }
 
     @GetMapping("/role")
-//    @PreAuthorize("@appAuthorizer.authorize(authentication, \"" +
-//            Constants.PERMISSION_GROUP1 + "_" + Constants.PERMISSION_LIST + "\")")
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_ROLE\")")
     public ResponseEntity<?> search(
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "page", required = false, defaultValue = "1") String page,

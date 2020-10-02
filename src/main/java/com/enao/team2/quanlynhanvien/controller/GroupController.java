@@ -29,8 +29,7 @@ public class GroupController {
     @Autowired
     GroupConverter groupConverter;
 
-    @PreAuthorize("@appAuthorizer.authorize(authentication, \"" +
-            Constants.PERMISSION_GROUP + "_" + Constants.PERMISSION_LIST + "\")")
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
     @GetMapping("/group/{id}")
     public ResponseEntity<GroupDTO> getOne(@PathVariable UUID id) {
         GroupDTO dto = new GroupDTO();
@@ -38,8 +37,7 @@ public class GroupController {
         return new ResponseEntity(dto, HttpStatus.OK);
     }
 
-    @PreAuthorize("@appAuthorizer.authorize(authentication, \"" +
-            Constants.PERMISSION_GROUP + "_" + Constants.PERMISSION_ADD + "\")")
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"ADD_GROUP\")")
     @PostMapping("/group")
     public ResponseEntity<?> save(@RequestBody GroupDTO dto) {
         GroupEntity entity = new GroupEntity();
@@ -54,8 +52,7 @@ public class GroupController {
         return new ResponseEntity(groupConverter.toDTO(entity), HttpStatus.OK);
     }
 
-    @PreAuthorize("@appAuthorizer.authorize(authentication, \"" +
-            Constants.PERMISSION_GROUP + "_" + Constants.PERMISSION_UPDATE + "\")")
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"EDIT_GROUP\")")
     @PutMapping("/group")
     public ResponseEntity<?> update(@RequestBody GroupDTO dto) {
         Optional<GroupEntity> entity1 = this.groupService.findById(dto.getId());
@@ -75,16 +72,14 @@ public class GroupController {
         return new ResponseEntity(groupConverter.toDTO(entity), HttpStatus.OK);
     }
 
-    @PreAuthorize("@appAuthorizer.authorize(authentication, \"" +
-            Constants.PERMISSION_GROUP + "_" + Constants.PERMISSION_DELETE + "\")")
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"REMOVE_GROUP\")")
     @DeleteMapping("/group/{id}")
     public ResponseEntity<MessageResponse> delete(@PathVariable(value = "id") UUID id) {
         MessageResponse responseMessage = this.groupService.delete(id);
         return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
     }
 
-    @PreAuthorize("@appAuthorizer.authorize(authentication, \"" +
-            Constants.PERMISSION_GROUP + "_" + Constants.PERMISSION_LIST + "\")")
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
     @GetMapping("/group")
     public ResponseEntity<?> search(
             @RequestParam(value = "keyword", required = false) String keyword,

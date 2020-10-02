@@ -14,5 +14,5 @@ public class RoleDTO extends AbstractDTO {
     private String name;
     private String description;
     private String slug;
-    private List<UUID> permissionIds;
+    private List<String> permissionIds;
 }

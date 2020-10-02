@@ -45,8 +45,15 @@ public class UserEntity extends AuditableEntity<UUID> {
     @ManyToOne(fetch = FetchType.LAZY)
     private PositionEntity positions;
 
-    //many to many role
-    @ManyToMany(mappedBy = "users")
+
+    @ManyToMany(cascade = {
+            CascadeType.PERSIST,
+            CascadeType.MERGE
+    })
+    @JoinTable(name = "user_role",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
     private Set<RoleEntity> roles = new HashSet<>();
 
     //override

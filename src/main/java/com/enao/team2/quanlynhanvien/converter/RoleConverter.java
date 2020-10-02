@@ -24,9 +24,9 @@ public class RoleConverter {
     public RoleEntity toEntity(RoleDTO roleDTO) {
         RoleEntity roleEntity = new RoleEntity();
         List<PermissionEntity> listPermissionEntity = new ArrayList();
-        List<UUID> listPermissionId = roleDTO.getPermissionIds();
-        for(UUID permissionId : listPermissionId){
-            Optional<PermissionEntity> permissionEntity = permissionService.findById(permissionId);
+        List<String> listPermissionId = roleDTO.getPermissionIds();
+        for(String permissionId : listPermissionId){
+            Optional<PermissionEntity> permissionEntity = permissionService.findByCode(permissionId);
             listPermissionEntity.add(permissionEntity.get());
         }
         Set<PermissionEntity> setPer = new HashSet<>(listPermissionEntity);
@@ -50,9 +50,9 @@ public class RoleConverter {
     public RoleDTO toDTO(RoleEntity roleEntity) {
         Set<PermissionEntity> setPermissionEntity = roleEntity.getPermissions();
         List<PermissionEntity> listPermissionEntity = new ArrayList<>(setPermissionEntity);
-        List<UUID> listPermissionIds = new ArrayList<>();
+        List<String> listPermissionIds = new ArrayList<>();
         for (PermissionEntity permissionEntity : listPermissionEntity) {
-            listPermissionIds.add(permissionEntity.getId());
+            listPermissionIds.add(permissionEntity.getCode());
         }
         RoleDTO roleDTO = new RoleDTO();
         roleDTO.setId(roleEntity.getId());

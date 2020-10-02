@@ -9,6 +9,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface IPermissionRepository extends JpaRepository<PermissionEntity, UUID> {
-    Optional<PermissionEntity> findByName(String name);
+public interface IPermissionRepository extends JpaRepository<PermissionEntity, String> {
+    Optional<PermissionEntity> findByCode(String code);
 }
