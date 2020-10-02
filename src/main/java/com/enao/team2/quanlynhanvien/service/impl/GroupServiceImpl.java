@@ -47,7 +47,6 @@ public class GroupServiceImpl implements IGroupService {
     }
 
     @Override
-    @Cacheable(cacheNames = "groups", condition = "#is_active = true")
     public Optional<GroupEntity> findByName(String name) {
         return groupRepository.findByName(name);
     }

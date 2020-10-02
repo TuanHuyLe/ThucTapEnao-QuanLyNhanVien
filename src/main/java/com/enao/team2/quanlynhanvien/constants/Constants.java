@@ -22,6 +22,6 @@ public class Constants {
     public static final String PERMISSION_DELETE = "delete";
 
     //group
-    public static final String PERMISSION_GROUP1 = "group1";
+    public static final String PERMISSION_GROUP = "group";
     public static final String PERMISSION_GROUP2 = "group2";
 }

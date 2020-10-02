@@ -13,14 +13,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminController {
 
     @GetMapping("/list")
-    @PreAuthorize("@appAuthorizer.authorize(authentication, \"list_group\" )")
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"" +
+            Constants.PERMISSION_GROUP + "_" + Constants.PERMISSION_LIST + "\")")
     public String listGroup() {
         return "group";
     }
 
     @GetMapping("/add")
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"" +
-            Constants.PERMISSION_GROUP1 + "_" + Constants.PERMISSION_ADD + "\")")
+            Constants.PERMISSION_GROUP + "_" + Constants.PERMISSION_ADD + "\")")
     public String addGroup() {
         return "add";
     }
