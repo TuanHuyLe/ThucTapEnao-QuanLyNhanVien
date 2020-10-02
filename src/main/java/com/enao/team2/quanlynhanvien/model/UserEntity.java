@@ -41,6 +41,10 @@ public class UserEntity extends AuditableEntity<UUID> {
     @ManyToOne(fetch = FetchType.LAZY)
     private GroupEntity group;
 
+    //many to one positon
+    @ManyToOne(fetch = FetchType.LAZY)
+    private PositionEntity positions;
+
     //many to many role
     @ManyToMany(mappedBy = "users")
     private Set<RoleEntity> roles = new HashSet<>();

@@ -8,24 +8,23 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 @Entity
-@Table(name = "permission")
+@Table(name = "module")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PermissionEntity {
+public class Module {
     @Id
     @Column(name = "code")
     private String code;
     @Column(name = "name")
     private String name;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Action action;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Module module;
-    @ManyToMany(mappedBy = "permissions")
-    private Set<RoleEntity> roles = new HashSet<>();
+    @OneToMany(
+            mappedBy = "module",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private Set<PermissionEntity> permissions = new HashSet<>();
 }

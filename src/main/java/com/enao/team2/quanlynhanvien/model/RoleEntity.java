@@ -31,11 +31,10 @@ public class RoleEntity extends AuditableEntity<UUID> {
             CascadeType.PERSIST,
             CascadeType.MERGE
     })
-    @JoinTable(name = "UserRole",
+    @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "role_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    @Getter(AccessLevel.NONE)
     private Set<UserEntity> users = new HashSet<>();
 
     //many to many permission
@@ -43,7 +42,7 @@ public class RoleEntity extends AuditableEntity<UUID> {
             CascadeType.PERSIST,
             CascadeType.MERGE
     })
-    @JoinTable(name = "RolePermission",
+    @JoinTable(name = "role_permission",
             joinColumns = @JoinColumn(name = "role_id"),
             inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
