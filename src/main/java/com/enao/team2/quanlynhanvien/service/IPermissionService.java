@@ -8,5 +8,4 @@ import java.util.Optional;
 public interface IPermissionService {
     List<PermissionEntity> findAll();
     Optional<PermissionEntity> findByName(String name);
-    List
 }
