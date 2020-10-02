@@ -11,7 +11,7 @@ public class MyAuditorAware implements AuditorAware<UUID> {
 
     @Override
     public Optional<UUID> getCurrentAuditor() {
-        UserDetailsImpl userDetails = (UserDetailsImpl)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return Optional.of(userDetails.getId());
+        UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return Optional.of(user.getId());
     }
 }

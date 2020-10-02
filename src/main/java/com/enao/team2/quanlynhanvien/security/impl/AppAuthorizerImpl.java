@@ -46,7 +46,7 @@ public class AppAuthorizerImpl implements IAppAuthorizer {
                 throw new UnauthorizedException(new MessageResponse("User not exists authorities"));
             }
             //get required permissions
-            Optional<PermissionEntity> permissionEntity = permissionService.findByName(permission);
+            Optional<PermissionEntity> permissionEntity = permissionService.findByCode(permission);
             //check required permissions
             if (!permissionEntity.isPresent()) {
                 throw new UnauthorizedException(new MessageResponse("Permissions not exists"));

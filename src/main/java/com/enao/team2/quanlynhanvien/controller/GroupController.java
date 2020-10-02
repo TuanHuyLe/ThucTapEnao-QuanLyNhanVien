@@ -29,69 +29,58 @@ public class GroupController {
     @Autowired
     GroupConverter groupConverter;
 
-//    @GetMapping("/groups")
-//    public Page<GroupDTO> getList(@RequestParam(value = "page") int page, @RequestParam(value = "limit") int limit){
-//        Page<GroupEntity> pag = this.groupService.getByPage(page, limit);
-//        Page<GroupDTO> pagee = this.groupConverter.toPageDTO(pag);
-//        return pagee;
-//    }
-
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
     @GetMapping("/group/{id}")
     public ResponseEntity<GroupDTO> getOne(@PathVariable UUID id) {
         GroupDTO dto = new GroupDTO();
-//            ResponseMessage responseMessage = new ResponseMessage();
         dto = this.groupConverter.toDTO(this.groupService.getOne(id));
-//            Optional<GroupEntity> optionalGroupEntity = this.groupService.findById(id);
-//            if (!optionalGroupEntity.isPresent()){
-//                responseMessage.setMessage("Không tìm thấy bản ghi!");
-//                return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
-//            }
-//            else{
         return new ResponseEntity(dto, HttpStatus.OK);
     }
 
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"ADD_GROUP\")")
     @PostMapping("/group")
     public ResponseEntity<?> save(@RequestBody GroupDTO dto) {
         GroupEntity entity = new GroupEntity();
         MessageResponse responseMessage = new MessageResponse();
-        Optional<GroupEntity> name = this.groupService.findByName(dto.getName());
+        Optional<GroupEntity> name = groupService.findByName(dto.getName());
         if (name.isPresent()) {
-            responseMessage.setMessage("Trùng tên");
+            responseMessage.setMessage("Trùng tên!");
             return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
-        } else {
-            entity = (GroupEntity) this.groupService.save(this.groupConverter.toEntity(dto));
-            responseMessage.setMessage("Lưu thành công!");
-            return new ResponseEntity(entity, HttpStatus.OK);
         }
+        entity = this.groupService.save(this.groupConverter.toEntity(dto));
+        responseMessage.setMessage("Lưu thành công!");
+        return new ResponseEntity(groupConverter.toDTO(entity), HttpStatus.OK);
     }
 
-    @PutMapping("/group/{id}")
-    public ResponseEntity<?> update(@RequestBody GroupDTO dto, @PathVariable UUID id) {
-        GroupEntity entity = this.groupService.getOne(id);
-        Optional<GroupEntity> name = this.groupService.findByName(dto.getName());
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"EDIT_GROUP\")")
+    @PutMapping("/group")
+    public ResponseEntity<?> update(@RequestBody GroupDTO dto) {
+        Optional<GroupEntity> entity1 = this.groupService.findById(dto.getId());
         MessageResponse responseMessage = new MessageResponse();
-        if (name.isPresent() && (!dto.getName().equals(entity.getName()))) {
-            responseMessage.setMessage("Trùng tên");
+        if (!entity1.isPresent()){
+            responseMessage.setMessage("Không tìm thất bản ghi!");
             return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
-        } else {
-            dto.setId(entity.getId());
-            dto.setActive(entity.getActive());
-            this.groupService.save(this.groupConverter.toEntity(dto));
-            responseMessage.setMessage("Sửa thành công!");
-            return new ResponseEntity(responseMessage.getMessage() + entity, HttpStatus.OK);
         }
-
+        GroupEntity entity = entity1.get();
+        Optional<GroupEntity> name = this.groupService.findByName(dto.getName());
+        if (name.isPresent() && !dto.getName().equals(entity.getName())) {
+            responseMessage.setMessage("Trùng tên!");
+            return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
+        }
+        entity = this.groupService.save(groupConverter.toEntity(dto));
+        responseMessage.setMessage("Sửa thành công");
+        return new ResponseEntity(groupConverter.toDTO(entity), HttpStatus.OK);
     }
 
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"REMOVE_GROUP\")")
     @DeleteMapping("/group/{id}")
     public ResponseEntity<MessageResponse> delete(@PathVariable(value = "id") UUID id) {
         MessageResponse responseMessage = this.groupService.delete(id);
         return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
     }
 
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
     @GetMapping("/group")
-//    @PreAuthorize("@appAuthorizer.authorize(authentication, \"" +
-//            Constants.PERMISSION_GROUP1 + "_" + Constants.PERMISSION_LIST + "\")")
     public ResponseEntity<?> search(
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "page", required = false, defaultValue = "1") String page,

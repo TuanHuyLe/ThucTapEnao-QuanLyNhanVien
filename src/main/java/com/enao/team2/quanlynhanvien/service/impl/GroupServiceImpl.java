@@ -3,6 +3,7 @@ package com.enao.team2.quanlynhanvien.service.impl;
 import com.enao.team2.quanlynhanvien.constants.ESearchKey;
 import com.enao.team2.quanlynhanvien.constants.ESearchOperation;
 import com.enao.team2.quanlynhanvien.converter.GroupConverter;
+import com.enao.team2.quanlynhanvien.dto.GroupDTO;
 import com.enao.team2.quanlynhanvien.dto.SearchCriteria;
 import com.enao.team2.quanlynhanvien.generic.GenericSpecification;
 import com.enao.team2.quanlynhanvien.messages.MessageResponse;
@@ -18,6 +19,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,7 +47,6 @@ public class GroupServiceImpl implements IGroupService {
     }
 
     @Override
-    @Cacheable(cacheNames = "groups", condition = "#is_active = true")
     public Optional<GroupEntity> findByName(String name) {
         return groupRepository.findByName(name);
     }
@@ -106,4 +108,5 @@ public class GroupServiceImpl implements IGroupService {
     public Page<GroupEntity> findAll(Pageable pageable) {
         return groupRepository.findAll(pageable);
     }
+
 }

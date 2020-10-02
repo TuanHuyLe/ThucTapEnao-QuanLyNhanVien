@@ -1,7 +1,9 @@
 package com.enao.team2.quanlynhanvien.model;
 
-import lombok.*;
-import org.hibernate.annotations.Where;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -9,23 +11,26 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "permissions")
-@Where(clause = "is_active=true")
+@Table(name = "permission")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+<<<<<<< HEAD
 public class PermissionEntity extends AuditableEntity<UUID> {
     @Column
+=======
+@AllArgsConstructor
+public class PermissionEntity {
+    @Id
+    @Column(name = "code")
+    private String code;
+    @Column(name = "name")
+>>>>>>> d6be2a2eef559f52c9c323b4146ff78b19952a68
     private String name;
-
-    @Column
-    private String description;
-
-    @Column
-    private UUID parent_id;
-
-    //many to many role
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Action action;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Module module;
     @ManyToMany(mappedBy = "permissions")
     private Set<RoleEntity> roles = new HashSet<>();
 }

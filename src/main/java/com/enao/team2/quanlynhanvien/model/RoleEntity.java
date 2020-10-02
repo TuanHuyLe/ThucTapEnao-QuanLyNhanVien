@@ -23,16 +23,10 @@ public class RoleEntity extends AuditableEntity<UUID> {
     @Column
     private String description;
 
-    //many to many users
-    @ManyToMany(cascade = {
-            CascadeType.PERSIST,
-            CascadeType.MERGE
-    })
-    @JoinTable(name = "UserRole",
-            joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    @Getter(AccessLevel.NONE)
+    @Column
+    private String slug;
+
+    @ManyToMany(mappedBy = "roles")
     private Set<UserEntity> users = new HashSet<>();
 
     //many to many permission
@@ -40,7 +34,7 @@ public class RoleEntity extends AuditableEntity<UUID> {
             CascadeType.PERSIST,
             CascadeType.MERGE
     })
-    @JoinTable(name = "RolePermission",
+    @JoinTable(name = "role_permission",
             joinColumns = @JoinColumn(name = "role_id"),
             inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
