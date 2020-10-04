@@ -44,7 +44,9 @@ public class UserConverter {
         userDTO.setGender(userEntity.getGender());
         userDTO.setActive(userEntity.getActive());
         userDTO.setSlug(userEntity.getSlug());
-        userDTO.setGroupName(userEntity.getGroup().getName());
+        if (userEntity.getGroup() != null) {
+            userDTO.setGroupName(userEntity.getGroup().getName());
+        }
         return userDTO;
     }
 }

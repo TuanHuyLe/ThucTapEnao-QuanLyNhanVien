@@ -4,10 +4,8 @@ import com.enao.team2.quanlynhanvien.constants.ESearchKey;
 import com.enao.team2.quanlynhanvien.constants.ESearchOperation;
 import com.enao.team2.quanlynhanvien.dto.SearchCriteria;
 import com.enao.team2.quanlynhanvien.generic.GenericSpecification;
-import com.enao.team2.quanlynhanvien.model.GroupEntity;
 import com.enao.team2.quanlynhanvien.model.UserEntity;
 import com.enao.team2.quanlynhanvien.repository.IUserRepository;
-import com.enao.team2.quanlynhanvien.service.IGroupService;
 import com.enao.team2.quanlynhanvien.service.IUserService;
 import com.enao.team2.quanlynhanvien.utils.SlugUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,4 +63,5 @@ public class UserServiceImpl implements IUserService {
     public Optional<UserEntity> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
+
 }

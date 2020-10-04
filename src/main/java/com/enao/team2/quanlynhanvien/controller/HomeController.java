@@ -2,8 +2,11 @@ package com.enao.team2.quanlynhanvien.controller;
 
 import com.enao.team2.quanlynhanvien.converter.UserConverter;
 import com.enao.team2.quanlynhanvien.dto.UserDTO;
+import com.enao.team2.quanlynhanvien.generic.GenericPageable;
+import com.enao.team2.quanlynhanvien.generic.GenericSort;
 import com.enao.team2.quanlynhanvien.model.UserEntity;
 import com.enao.team2.quanlynhanvien.service.IUserService;
+import com.enao.team2.quanlynhanvien.service.impl.CriteriaBuilderImpl;
 import com.enao.team2.quanlynhanvien.utils.excel.ExcelImporter;
 import com.enao.team2.quanlynhanvien.utils.excel.UserExcelExporter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +15,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -31,6 +34,9 @@ public class HomeController {
 
     @Autowired
     private UserConverter userConverter;
+
+    @Autowired
+    private CriteriaBuilderImpl<UserEntity> criteriaBuilder;
 
     @GetMapping("/flush-cache")
     public String flushCache() {
@@ -101,10 +107,44 @@ public class HomeController {
     import excel
      */
     @GetMapping("/users/import/excel")
-    public ResponseEntity<List<UserDTO>> importFromExcel(@RequestParam("file") MultipartFile files) throws IOException {
+    public ResponseEntity<List<UserDTO>> importFromExcel(
+            @RequestParam("file") MultipartFile files) throws IOException {
         ExcelImporter excelImporter = new ExcelImporter(files);
         List<UserDTO> userDTOs = excelImporter.readBooksFromExcelFile();
         return ResponseEntity.ok(userDTOs);
+    }
+
+    /*
+    test search by criteria builder
+     */
+    @GetMapping("/search")
+    public ResponseEntity<?> search(
+            @RequestParam String attr,
+            @RequestParam String type,
+            @RequestParam String value,
+            @RequestParam String sb,
+            @RequestParam(defaultValue = "true") Boolean asc,
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "1") Integer limit) {
+        List<UserDTO> userDTOs = new ArrayList<>();
+        List<UserEntity> userEntities;
+        //sort
+        GenericSort genericSort = new GenericSort(sb, asc);
+        //pageable
+        GenericPageable genericPageable = new GenericPageable(page, limit);
+
+        userEntities = criteriaBuilder.builder(UserEntity.class, attr, type,
+                        value, genericSort, genericPageable);
+
+        if (userEntities.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        userEntities.forEach(x -> userDTOs.add(userConverter.toDTO(x)));
+        Map<String, Object> response = new HashMap<>();
+        response.put("currentPage", page);
+        response.put("pageSize", limit);
+        response.put("users", userDTOs);
+        return ResponseEntity.ok(response);
     }
 
 }

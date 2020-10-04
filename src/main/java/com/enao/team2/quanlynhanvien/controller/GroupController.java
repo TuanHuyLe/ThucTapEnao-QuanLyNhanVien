@@ -1,11 +1,9 @@
 package com.enao.team2.quanlynhanvien.controller;
 
-import com.enao.team2.quanlynhanvien.constants.Constants;
 import com.enao.team2.quanlynhanvien.converter.GroupConverter;
 import com.enao.team2.quanlynhanvien.dto.GroupDTO;
 import com.enao.team2.quanlynhanvien.messages.MessageResponse;
 import com.enao.team2.quanlynhanvien.model.GroupEntity;
-import com.enao.team2.quanlynhanvien.model.UserEntity;
 import com.enao.team2.quanlynhanvien.service.IGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping("/api/enao")
 public class GroupController {
 
@@ -40,7 +39,7 @@ public class GroupController {
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"ADD_GROUP\")")
     @PostMapping("/group")
     public ResponseEntity<?> save(@RequestBody GroupDTO dto) {
-        GroupEntity entity = new GroupEntity();
+        GroupEntity entity;
         MessageResponse responseMessage = new MessageResponse();
         Optional<GroupEntity> name = groupService.findByName(dto.getName());
         if (name.isPresent()) {
@@ -58,7 +57,7 @@ public class GroupController {
         Optional<GroupEntity> entity1 = this.groupService.findById(dto.getId());
         MessageResponse responseMessage = new MessageResponse();
         if (!entity1.isPresent()){
-            responseMessage.setMessage("Không tìm thất bản ghi!");
+            responseMessage.setMessage("Không tìm thấy bản ghi!");
             return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
         }
         GroupEntity entity = entity1.get();
@@ -79,8 +78,8 @@ public class GroupController {
         return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
     }
 
-    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
-    @GetMapping("/group")
+//    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
+    @GetMapping("/groups")
     public ResponseEntity<?> search(
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "page", required = false, defaultValue = "1") String page,

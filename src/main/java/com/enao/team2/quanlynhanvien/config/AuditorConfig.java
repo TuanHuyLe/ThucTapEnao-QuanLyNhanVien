@@ -1,6 +1,5 @@
 package com.enao.team2.quanlynhanvien.config;
 
-import com.enao.team2.quanlynhanvien.model.UserEntity;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
