@@ -40,7 +40,7 @@ public class DatabaseSeeder {
     @Autowired
     private IModuleRepository moduleRepository;
 
-    @EventListener
+//    @EventListener
     @Transactional
     public void seed(ContextRefreshedEvent event) {
         try {

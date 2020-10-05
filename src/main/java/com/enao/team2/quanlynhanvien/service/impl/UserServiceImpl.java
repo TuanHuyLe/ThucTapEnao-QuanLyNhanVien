@@ -10,8 +10,6 @@ import com.enao.team2.quanlynhanvien.repository.IUserRepository;
 import com.enao.team2.quanlynhanvien.service.IUserService;
 import com.enao.team2.quanlynhanvien.utils.SlugUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,14 +31,8 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    @Cacheable(cacheNames = "users")
     public Page<UserEntity> findAll(Pageable pageable) {
         return userRepository.findAll(pageable);
-    }
-
-    @Override
-    @CacheEvict(cacheNames = "users", allEntries = true)
-    public void flushCache() {
     }
 
     @Override

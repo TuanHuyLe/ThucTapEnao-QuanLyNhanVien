@@ -20,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -37,12 +36,6 @@ public class HomeController {
 
     @Autowired
     private CriteriaBuilderImpl<UserEntity> criteriaBuilder;
-
-    @GetMapping("/flush-cache")
-    public String flushCache() {
-        userService.flushCache();
-        return "Flush cache successfully";
-    }
 
     @GetMapping("/users")
     public ResponseEntity<?> home(
