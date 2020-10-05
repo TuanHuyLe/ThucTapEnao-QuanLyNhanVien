@@ -17,13 +17,15 @@ public class Constants {
     public static final String ROLE_MANAGER = "MANAGER";
     public static final String ROLE_SUPER_ADMIN = "SUPER_ADMIN";
 
-    //permission
-    public static final String PERMISSION_LIST = "list";
-    public static final String PERMISSION_ADD = "add";
-    public static final String PERMISSION_UPDATE = "update";
-    public static final String PERMISSION_DELETE = "delete";
+    //action
+    public static final String ACTION_VIEW = "VIEW";
+    public static final String ACTION_ADD = "ADD";
+    public static final String ACTION_EDIT = "EDIT";
+    public static final String ACTION_REMOVE = "REMOVE";
 
-    //group
-    public static final String PERMISSION_GROUP = "group";
-    public static final String PERMISSION_GROUP2 = "group2";
+    //module
+    public static final String MODULE_GROUP = "GROUP";
+    public static final String MODULE_POSITION = "POSITION";
+    public static final String MODULE_ROLE = "ROLE";
+    public static final String MODULE_USER = "USER";
 }
