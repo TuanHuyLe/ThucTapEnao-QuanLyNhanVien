@@ -16,7 +16,7 @@ public interface IUserService {
 
     UserEntity save(UserEntity userEntity);
 
-    Page<UserEntity> findUsersWithPredicate(String keyword, Pageable pageable);
+    Page<UserEntity> findUsersWithPredicate(String keyword, String type, Pageable pageable);
 
     Optional<UserEntity> findByUsername(String username);
 }
