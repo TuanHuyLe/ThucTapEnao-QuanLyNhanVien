@@ -14,14 +14,14 @@ public class AdminController {
 
     @GetMapping("/list")
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"" +
-            Constants.PERMISSION_GROUP + "_" + Constants.PERMISSION_LIST + "\")")
+            Constants.ACTION_VIEW + "_" + Constants.MODULE_GROUP + "\")")
     public String listGroup() {
         return "group";
     }
 
     @GetMapping("/add")
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"" +
-            Constants.PERMISSION_GROUP + "_" + Constants.PERMISSION_ADD + "\")")
+            Constants.ACTION_ADD + "_" + Constants.MODULE_GROUP + "\")")
     public String addGroup() {
         return "add";
     }
