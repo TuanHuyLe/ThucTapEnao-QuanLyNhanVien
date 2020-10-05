@@ -47,6 +47,7 @@ public class HomeController {
     @GetMapping("/users")
     public ResponseEntity<?> home(
             @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "type", required = false, defaultValue = "all") String type,
             @RequestParam(value = "page", required = false, defaultValue = "1") String page,
             @RequestParam(value = "limit", required = false, defaultValue = "5") String limit,
             @RequestParam(value = "sb", required = false, defaultValue = "") String sortBy,
@@ -65,7 +66,7 @@ public class HomeController {
         Page<UserEntity> usersPage;
         //search
         if (keyword != null) {
-            usersPage = userService.findUsersWithPredicate(keyword, pageable);
+            usersPage = userService.findUsersWithPredicate(keyword, type, pageable);
         } else {
             usersPage = userService.findAll(pageable);
         }
@@ -134,7 +135,7 @@ public class HomeController {
         GenericPageable genericPageable = new GenericPageable(page, limit);
 
         userEntities = criteriaBuilder.builder(UserEntity.class, attr, type,
-                        value, genericSort, genericPageable);
+                value, genericSort, genericPageable);
 
         if (userEntities.isEmpty()) {
             return ResponseEntity.noContent().build();

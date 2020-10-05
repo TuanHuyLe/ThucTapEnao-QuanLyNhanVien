@@ -9,6 +9,8 @@ public class Constants {
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
     public static final Pattern VALID_USERNAME_REGEX =
             Pattern.compile("\\w+", Pattern.CASE_INSENSITIVE);
+    public static final Pattern VALID_FULL_NAME_REGEX =
+            Pattern.compile("[a-zA-Z\\s]+", Pattern.CASE_INSENSITIVE);
 
     //role
     public static final String ROLE_GUEST = "GUEST";
