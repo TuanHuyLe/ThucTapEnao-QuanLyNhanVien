@@ -2,8 +2,12 @@ package com.enao.team2.quanlynhanvien.controller;
 
 import com.enao.team2.quanlynhanvien.converter.GroupConverter;
 import com.enao.team2.quanlynhanvien.dto.GroupDTO;
+import com.enao.team2.quanlynhanvien.dto.UserDTO;
+import com.enao.team2.quanlynhanvien.generic.GenericPageable;
+import com.enao.team2.quanlynhanvien.generic.GenericSort;
 import com.enao.team2.quanlynhanvien.messages.MessageResponse;
 import com.enao.team2.quanlynhanvien.model.GroupEntity;
+import com.enao.team2.quanlynhanvien.model.UserEntity;
 import com.enao.team2.quanlynhanvien.service.IGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,10 +34,12 @@ public class GroupController {
 
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
     @GetMapping("/group/{id}")
-    public ResponseEntity<GroupDTO> getOne(@PathVariable UUID id) {
-        GroupDTO dto = new GroupDTO();
-        dto = this.groupConverter.toDTO(this.groupService.getOne(id));
-        return new ResponseEntity(dto, HttpStatus.OK);
+    public ResponseEntity<?> getOne(@PathVariable UUID id) {
+        if (!groupService.checkId(id)){
+            return new ResponseEntity<>(new MessageResponse("Không tìm thấy bản ghi!"), HttpStatus.OK);
+        }
+        GroupEntity groupEntity = groupService.findById(id).get();
+        return new ResponseEntity(groupConverter.toDTO(groupEntity), HttpStatus.OK);
     }
 
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"ADD_GROUP\")")
@@ -73,15 +79,21 @@ public class GroupController {
 
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"REMOVE_GROUP\")")
     @DeleteMapping("/group/{id}")
-    public ResponseEntity<MessageResponse> delete(@PathVariable(value = "id") UUID id) {
-        MessageResponse responseMessage = this.groupService.delete(id);
-        return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
+    public ResponseEntity<?> delete(@PathVariable(value = "id") UUID id) {
+        if (!groupService.checkId(id)){
+            return new ResponseEntity(new MessageResponse("Không tìm thấy bản ghi!"), HttpStatus.OK);
+        }
+        GroupEntity groupEntity = groupService.findById(id).get();
+        groupEntity.setActive(false);
+        groupService.save(groupEntity);
+        return new ResponseEntity(groupConverter.toDTO(groupEntity), HttpStatus.OK);
     }
 
-//    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
     @GetMapping("/groups")
     public ResponseEntity<?> search(
             @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "type", required = false, defaultValue = "all") String type,
             @RequestParam(value = "page", required = false, defaultValue = "1") String page,
             @RequestParam(value = "limit", required = false, defaultValue = "5") String limit,
             @RequestParam(value = "sb", required = false, defaultValue = "") String sortBy,
@@ -100,21 +112,21 @@ public class GroupController {
         Page<GroupEntity> groupsPage;
         //search
         if (keyword != null) {
-            groupsPage = groupService.findGroupsWithPredicate(keyword, pageable);
+            groupsPage = groupService.findGroupsWithPredicate(keyword, type, pageable);
         } else {
             groupsPage = groupService.findAll(pageable);
         }
         //response page
-        List<GroupDTO> groupDTOs = new ArrayList<>();
-        groupsPage.forEach(x -> groupDTOs.add(groupConverter.toDTO(x)));
-        if (groupDTOs.isEmpty()) {
+        if (groupsPage.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
+        List<GroupDTO> groupDTOS = new ArrayList<>();
+        groupsPage.forEach(x -> groupDTOS.add(groupConverter.toDTO(x)));
         Map<String, Object> response = new HashMap<>();
         response.put("totalPages", groupsPage.getTotalPages());
         response.put("totalItems", groupsPage.getTotalElements());
         response.put("currentPage", groupsPage.getNumber() + 1);
-        response.put("groups", groupDTOs);
+        response.put("groups", groupDTOS);
         return ResponseEntity.ok(response);
     }
 }
