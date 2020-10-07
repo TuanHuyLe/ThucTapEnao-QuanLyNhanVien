@@ -80,7 +80,7 @@ public class GroupController {
         return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
     }
 
-    //    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
     @GetMapping("/groups")
     public ResponseEntity<?> search(
             @RequestParam(value = "keyword", required = false) String keyword,
