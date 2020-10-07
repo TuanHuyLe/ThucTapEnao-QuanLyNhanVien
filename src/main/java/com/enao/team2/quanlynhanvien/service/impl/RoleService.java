@@ -1,5 +1,6 @@
 package com.enao.team2.quanlynhanvien.service.impl;
 
+import com.enao.team2.quanlynhanvien.constants.Constants;
 import com.enao.team2.quanlynhanvien.constants.ESearchKey;
 import com.enao.team2.quanlynhanvien.constants.ESearchOperation;
 import com.enao.team2.quanlynhanvien.dto.SearchCriteria;
@@ -56,29 +57,29 @@ public class RoleService implements IRoleService {
     @Override
     public RoleEntity save(RoleEntity newRoleEntity) { return roleRepository.save(newRoleEntity); }
 
-    @Override
-    public MessageResponse delete(UUID roleId) {
-        MessageResponse message = new MessageResponse();
-        RoleEntity entity = (RoleEntity) this.roleRepository.getOne(roleId);
-        Optional<RoleEntity> roleEntity = this.roleRepository.findById(roleId);
-        try {
-            if (!roleEntity.isPresent()) {
-                message.setMessage("Not Found!");
-            } else {
-                this.roleRepository.delete(entity);
-                message.setMessage("Delete success");
-            }
-        } catch (Exception e) {
-            message.setMessage("Lỗi xóa: " + e);
-        }
-        return message;
-    }
+//    @Override
+//    public MessageResponse delete(UUID roleId) {
+//        MessageResponse message = new MessageResponse();
+//        RoleEntity entity = (RoleEntity) this.roleRepository.getOne(roleId);
+//        Optional<RoleEntity> roleEntity = this.roleRepository.findById(roleId);
+//        try {
+//            if (!roleEntity.isPresent()) {
+//                message.setMessage("Not Found!");
+//            } else {
+//                this.roleRepository.delete(entity);
+//                message.setMessage("Delete success");
+//            }
+//        } catch (Exception e) {
+//            message.setMessage("Lỗi xóa: " + e);
+//        }
+//        return message;
+//    }
 
-    @Override
-    public Page<RoleEntity> getByPage(int pageIndex, int pageSize) {
-        Page<RoleEntity> page = this.roleRepository.findAll(PageRequest.of(pageIndex - 1, pageSize));
-        return page;
-    }
+//    @Override
+//    public Page<RoleEntity> getByPage(int pageIndex, int pageSize) {
+//        Page<RoleEntity> page = this.roleRepository.findAll(PageRequest.of(pageIndex - 1, pageSize));
+//        return page;
+//    }
 
     @Override
     public Optional<RoleEntity> findById(UUID id) {
@@ -86,17 +87,46 @@ public class RoleService implements IRoleService {
     }
 
     @Override
-    public RoleEntity getOne(UUID id) {
-        return this.roleRepository.getOne(id);
+    public boolean checkId(UUID id) {
+        Optional<RoleEntity> roleEntity = this.roleRepository.findById(id);
+        if (!roleEntity.isPresent()) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     @Override
-    public Page<RoleEntity> findRolesWithPredicate(String keyword, Pageable pageable) {
-        String slugKeyword = slugUtils.slug(keyword);
+    public Page<RoleEntity> findGroupsWithPredicate(String keyword, String type, Pageable pageable) {
         GenericSpecification<RoleEntity> genericSpecification = new GenericSpecification<>();
-        genericSpecification.add(new SearchCriteria(ESearchKey.name.name(), keyword, ESearchOperation.MATCH, null));
-        genericSpecification.add(new SearchCriteria(ESearchKey.slug.name(), slugKeyword, ESearchOperation.MATCH, null));
+        if ("all".equals(type)) {
+            genericSpecification.add(new SearchCriteria(ESearchKey.name.name(), keyword, ESearchOperation.MATCH, null));
+            if (Constants.VALID_FULL_NAME_REGEX.matcher(keyword).matches()) {
+                String slugKeyword = slugUtils.slug(keyword);
+                genericSpecification.add(new SearchCriteria(ESearchKey.slug.name(), slugKeyword, ESearchOperation.MATCH, null));
+            } else {
+                genericSpecification.add(new SearchCriteria(ESearchKey.name.name(), keyword, ESearchOperation.MATCH, null));
+            }
+        } else {
+            if (ESearchKey.name.name().equals(type)) {
+                if (Constants.VALID_FULL_NAME_REGEX.matcher(keyword).matches()) {
+                    String slugKeyword = slugUtils.slug(keyword);
+                    genericSpecification.add(new SearchCriteria(ESearchKey.slug.name(), slugKeyword, ESearchOperation.MATCH, null));
+                } else {
+                    genericSpecification.add(new SearchCriteria(ESearchKey.name.name(), keyword, ESearchOperation.MATCH, null));
+                }
+            }
+            if (ESearchKey.name.name().equals(type)) {
+                genericSpecification.add(new SearchCriteria(ESearchKey.username.name(), keyword, ESearchOperation.MATCH, null));
+            }
+        }
         return roleRepository.findAll(genericSpecification, pageable);
+    }
+
+
+    @Override
+    public RoleEntity getOne(UUID id) {
+        return this.roleRepository.getOne(id);
     }
 
 
