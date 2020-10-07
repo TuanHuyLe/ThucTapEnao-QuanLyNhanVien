@@ -73,7 +73,7 @@ public class GroupController {
             return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
         }
         entity = this.groupService.save(groupConverter.toEntity(dto));
-        responseMessage.setMessage("Sửa thành công");
+        //responseMessage.setMessage("Sửa thành công");
         return new ResponseEntity(groupConverter.toDTO(entity), HttpStatus.OK);
     }
 
