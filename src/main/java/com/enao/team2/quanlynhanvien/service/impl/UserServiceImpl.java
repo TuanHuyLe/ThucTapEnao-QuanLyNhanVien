@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements IUserService {
@@ -33,13 +34,12 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    @Cacheable(cacheNames = "users")
     public Page<UserEntity> findAll(Pageable pageable) {
         return userRepository.findAll(pageable);
     }
 
     @Override
-    @CacheEvict(cacheNames = "users", allEntries = true)
+    @CacheEvict(cacheNames = "user", allEntries = true)
     public void flushCache() {
     }
 
@@ -87,6 +87,18 @@ public class UserServiceImpl implements IUserService {
     @Override
     public Optional<UserEntity> findByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    @Override
+    public Optional<UserEntity> findById(UUID id) {
+        return userRepository.findById(id);
+    }
+
+    @Override
+    public UserEntity deleteSoftById(UserEntity dataDelete) {
+        dataDelete.setActive(false);
+        userRepository.save(dataDelete);
+        return dataDelete;
     }
 
 }

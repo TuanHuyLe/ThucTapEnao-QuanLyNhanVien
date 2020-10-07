@@ -7,12 +7,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDTO extends AbstractDTO {
+public class AddUserDTO extends AbstractDTO{
     private String username;
+    private String password;
     private String fullName;
     private Boolean gender;
     private String email;
     private String slug;
-    private String groupName;
-    private String positionName;
 }

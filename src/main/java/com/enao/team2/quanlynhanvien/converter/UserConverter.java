@@ -1,10 +1,12 @@
 package com.enao.team2.quanlynhanvien.converter;
 
+import com.enao.team2.quanlynhanvien.dto.AddUserDTO;
 import com.enao.team2.quanlynhanvien.dto.UserDTO;
 import com.enao.team2.quanlynhanvien.model.GroupEntity;
 import com.enao.team2.quanlynhanvien.model.UserEntity;
 import com.enao.team2.quanlynhanvien.utils.SlugUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -16,7 +18,11 @@ public class UserConverter {
 
     public UserEntity toEntity(UserDTO userDTO) {
         UserEntity userEntity = new UserEntity();
-        userEntity.setId(UUID.randomUUID());
+        if(userDTO.getId() == null){
+            userEntity.setId(UUID.randomUUID());
+        }else{
+            userEntity.setId(userDTO.getId());
+        }
         userEntity.setUsername(userDTO.getUsername());
         userEntity.setFullName(userDTO.getFullName());
         userEntity.setEmail(userDTO.getEmail());
@@ -35,6 +41,28 @@ public class UserConverter {
         return userEntity;
     }
 
+    public UserEntity toEntityWhenAdd(AddUserDTO userDTO) {
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId(UUID.randomUUID());
+        userEntity.setUsername(userDTO.getUsername());
+        userEntity.setPassword(BCrypt.hashpw(userDTO.getPassword(), BCrypt.gensalt(12)));
+        userEntity.setFullName(userDTO.getFullName());
+        userEntity.setEmail(userDTO.getEmail());
+        userEntity.setGender(userDTO.getGender());
+        userEntity.setSlug(slugUtils.slug(userDTO.getFullName()));
+        if (userDTO.getActive() != null) {
+            userEntity.setActive(userDTO.getActive());
+        } else {
+            userEntity.setActive(true);
+        }
+        if (userDTO.getGender() != null) {
+            userEntity.setGender(userDTO.getGender());
+        } else {
+            userEntity.setGender(true);
+        }
+        return userEntity;
+    }
+
     public UserDTO toDTO(UserEntity userEntity) {
         UserDTO userDTO = new UserDTO();
         userDTO.setId(userEntity.getId());
@@ -46,6 +74,9 @@ public class UserConverter {
         userDTO.setSlug(userEntity.getSlug());
         if (userEntity.getGroup() != null) {
             userDTO.setGroupName(userEntity.getGroup().getName());
+        }
+        if (userEntity.getPositions() != null) {
+            userDTO.setGroupName(userEntity.getPositions().getName());
         }
         return userDTO;
     }

@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface IUserService {
     void flushCache();
@@ -19,4 +20,8 @@ public interface IUserService {
     Page<UserEntity> findUsersWithPredicate(String keyword, String type, Pageable pageable);
 
     Optional<UserEntity> findByUsername(String username);
+
+    Optional<UserEntity> findById(UUID id);
+
+    UserEntity deleteSoftById(UserEntity dataDelete);
 }
