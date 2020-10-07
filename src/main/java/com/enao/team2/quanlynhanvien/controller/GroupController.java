@@ -2,6 +2,7 @@ package com.enao.team2.quanlynhanvien.controller;
 
 import com.enao.team2.quanlynhanvien.converter.GroupConverter;
 import com.enao.team2.quanlynhanvien.dto.GroupDTO;
+import com.enao.team2.quanlynhanvien.exception.NotFoundException;
 import com.enao.team2.quanlynhanvien.messages.MessageResponse;
 import com.enao.team2.quanlynhanvien.model.GroupEntity;
 import com.enao.team2.quanlynhanvien.service.IGroupService;
@@ -31,8 +32,9 @@ public class GroupController {
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
     @GetMapping("/group/{id}")
     public ResponseEntity<GroupDTO> getOne(@PathVariable UUID id) {
-        GroupDTO dto = new GroupDTO();
-        dto = this.groupConverter.toDTO(this.groupService.getOne(id));
+        GroupEntity groupEntity = groupService.findById(id).orElseThrow(
+                () -> new NotFoundException("Not found group with id: " + id.toString()));
+        GroupDTO dto = groupConverter.toDTO(groupEntity);
         return new ResponseEntity(dto, HttpStatus.OK);
     }
 
@@ -56,7 +58,7 @@ public class GroupController {
     public ResponseEntity<?> update(@RequestBody GroupDTO dto) {
         Optional<GroupEntity> entity1 = this.groupService.findById(dto.getId());
         MessageResponse responseMessage = new MessageResponse();
-        if (!entity1.isPresent()){
+        if (!entity1.isPresent()) {
             responseMessage.setMessage("Không tìm thấy bản ghi!");
             return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
         }
@@ -78,7 +80,7 @@ public class GroupController {
         return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
     }
 
-//    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
+    //    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
     @GetMapping("/groups")
     public ResponseEntity<?> search(
             @RequestParam(value = "keyword", required = false) String keyword,

@@ -1,5 +1,6 @@
 package com.enao.team2.quanlynhanvien.utils;
 
+import com.enao.team2.quanlynhanvien.exception.UnauthorizedException;
 import com.enao.team2.quanlynhanvien.service.impl.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
@@ -7,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.ResourceBundle;
@@ -40,7 +40,7 @@ public class JwtUtils implements Serializable {
         try {
             Jwts.parser().setSigningKey(SECRET).parseClaimsJws(jwt);
             return true;
-        } catch (MalformedJwtException ex) {
+        } catch (MalformedJwtException | SignatureException ex) {
             logger.error("Invalid JWT token");
         } catch (ExpiredJwtException ex) {
             logger.error("Expired JWT token");

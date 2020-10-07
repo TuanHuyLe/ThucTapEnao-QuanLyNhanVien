@@ -1,6 +1,7 @@
 package com.enao.team2.quanlynhanvien.security;
 
 import com.enao.team2.quanlynhanvien.constants.RedisKey;
+import com.enao.team2.quanlynhanvien.exception.UnauthorizedException;
 import com.enao.team2.quanlynhanvien.service.impl.UserDetailsServiceImpl;
 import com.enao.team2.quanlynhanvien.utils.JwtUtils;
 import org.slf4j.Logger;
@@ -47,7 +48,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             String jwt = getJwtFromRequest(request);
             UserDetails userDetails;
             if (jwt != null && jwtUtils.validateJwtToken(jwt) && template.opsForValue().get(RedisKey.JWT).equals(jwt)) {
-                if (template.hasKey(RedisKey.USER_DETAIL)) {
+                if (template.hasKey(RedisKey.USER_DETAIL) && template.opsForValue().get(RedisKey.USER_DETAIL) != null) {
                     userDetails = (UserDetails) template.opsForValue().get(RedisKey.USER_DETAIL);
                 } else {
                     //get username from jwt
@@ -62,8 +63,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception e) {
-            logger.error("Cannot set user authentication: {}", e);
-            throw e;
+            throw new UnauthorizedException(e.getMessage());
         }
         filterChain.doFilter(request, response);
     }

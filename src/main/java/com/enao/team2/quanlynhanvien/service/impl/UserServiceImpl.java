@@ -41,38 +41,42 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public Page<UserEntity> findUsersWithPredicate(String keyword, String type, Pageable pageable) {
+    public Page<UserEntity> findUsersWithPredicate(String keyword, String[] type, Pageable pageable) {
         GenericSpecification<UserEntity> genericSpecification = new GenericSpecification<>();
-        if ("all".equals(type)) {
-            genericSpecification.add(new SearchCriteria(ESearchKey.group.name(), keyword, ESearchOperation.MATCH, "name"));
-            genericSpecification.add(new SearchCriteria(ESearchKey.email.name(), keyword, ESearchOperation.MATCH, null));
-            genericSpecification.add(new SearchCriteria(ESearchKey.username.name(), keyword, ESearchOperation.MATCH, null));
-            if (Constants.VALID_FULL_NAME_REGEX.matcher(keyword).matches()) {
-                String slugKeyword = slugUtils.slug(keyword);
-                genericSpecification.add(new SearchCriteria(ESearchKey.slug.name(), slugKeyword, ESearchOperation.MATCH, null));
-            } else {
-                genericSpecification.add(new SearchCriteria(ESearchKey.fullName.name(), keyword, ESearchOperation.MATCH, null));
-            }
-        } else {
-            if (ESearchKey.email.name().equals(type)) {
-                genericSpecification.add(new SearchCriteria(ESearchKey.email.name(), keyword, ESearchOperation.MATCH, null));
-            }
-            if (ESearchKey.fullName.name().equals(type)) {
+
+        for (String t : type) {
+            if (ESearchKey.group.name().equals(t)) {
+                genericSpecification.add(new SearchCriteria(ESearchKey.group.name(), keyword, ESearchOperation.MATCH, ESearchKey.name.name()));
+            } else if (ESearchKey.fullName.name().equals(t)) {
                 if (Constants.VALID_FULL_NAME_REGEX.matcher(keyword).matches()) {
                     String slugKeyword = slugUtils.slug(keyword);
                     genericSpecification.add(new SearchCriteria(ESearchKey.slug.name(), slugKeyword, ESearchOperation.MATCH, null));
                 } else {
                     genericSpecification.add(new SearchCriteria(ESearchKey.fullName.name(), keyword, ESearchOperation.MATCH, null));
                 }
-            }
-            if (ESearchKey.username.name().equals(type)) {
-                genericSpecification.add(new SearchCriteria(ESearchKey.username.name(), keyword, ESearchOperation.MATCH, null));
-            }
-            if (ESearchKey.group.name().equals(type)) {
-                genericSpecification.add(new SearchCriteria(ESearchKey.group.name(), keyword, ESearchOperation.MATCH, "name"));
+//            } else if (ESearchKey.gender.name().equals(t)) {
+//                genericSpecification.add(new SearchCriteria(t, Boolean.valueOf(keyword), ESearchOperation.EQUAL, null));
+            } else {
+                genericSpecification.add(new SearchCriteria(t, keyword, ESearchOperation.MATCH, null));
             }
         }
 
+        return userRepository.findAll(genericSpecification, pageable);
+    }
+
+    @Override
+    public Page<UserEntity> findUsersWithPredicate(String keyword, Pageable pageable) {
+        GenericSpecification<UserEntity> genericSpecification = new GenericSpecification<>();
+
+        genericSpecification.add(new SearchCriteria(ESearchKey.group.name(), keyword, ESearchOperation.MATCH, ESearchKey.name.name()));
+        genericSpecification.add(new SearchCriteria(ESearchKey.email.name(), keyword, ESearchOperation.MATCH, null));
+        genericSpecification.add(new SearchCriteria(ESearchKey.username.name(), keyword, ESearchOperation.MATCH, null));
+        if (Constants.VALID_FULL_NAME_REGEX.matcher(keyword).matches()) {
+            String slugKeyword = slugUtils.slug(keyword);
+            genericSpecification.add(new SearchCriteria(ESearchKey.slug.name(), slugKeyword, ESearchOperation.MATCH, null));
+        } else {
+            genericSpecification.add(new SearchCriteria(ESearchKey.fullName.name(), keyword, ESearchOperation.MATCH, null));
+        }
         return userRepository.findAll(genericSpecification, pageable);
     }
 

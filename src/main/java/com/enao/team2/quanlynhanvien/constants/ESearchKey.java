@@ -7,4 +7,5 @@ public enum ESearchKey {
     email,
     name,
     group,
+    gender,
 }

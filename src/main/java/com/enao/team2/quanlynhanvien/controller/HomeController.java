@@ -2,6 +2,7 @@ package com.enao.team2.quanlynhanvien.controller;
 
 import com.enao.team2.quanlynhanvien.converter.UserConverter;
 import com.enao.team2.quanlynhanvien.dto.UserDTO;
+import com.enao.team2.quanlynhanvien.exception.NoContentException;
 import com.enao.team2.quanlynhanvien.generic.GenericPageable;
 import com.enao.team2.quanlynhanvien.generic.GenericSort;
 import com.enao.team2.quanlynhanvien.model.UserEntity;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,13 +42,13 @@ public class HomeController {
     @GetMapping("/users")
     public ResponseEntity<?> home(
             @RequestParam(value = "keyword", required = false) String keyword,
-            @RequestParam(value = "type", required = false, defaultValue = "all") String type,
+            @RequestParam(value = "type", required = false) String type,
             @RequestParam(value = "page", required = false, defaultValue = "1") String page,
             @RequestParam(value = "limit", required = false, defaultValue = "5") String limit,
             @RequestParam(value = "sb", required = false, defaultValue = "") String sortBy,
             @RequestParam(value = "asc", required = false, defaultValue = "true") String asc) {
         Pageable pageable;
-        //sort
+        //sort and pagination using pageable
         if (!sortBy.isEmpty()) {
             if (Boolean.parseBoolean(asc)) {
                 pageable = PageRequest.of(Integer.parseInt(page) - 1, Integer.parseInt(limit), Sort.by(sortBy).ascending());
@@ -57,15 +59,18 @@ public class HomeController {
             pageable = PageRequest.of(Integer.parseInt(page) - 1, Integer.parseInt(limit));
         }
         Page<UserEntity> usersPage;
-        //search
-        if (keyword != null) {
-            usersPage = userService.findUsersWithPredicate(keyword, type, pageable);
-        } else {
+        //search using predicate
+        if (keyword != null && type != null) {  //tim kiem co type
+            String[] types = type.split("-");
+            usersPage = userService.findUsersWithPredicate(keyword, types, pageable);
+        } else if (keyword != null) {           //tim kiem khong co type
+            usersPage = userService.findUsersWithPredicate(keyword, pageable);
+        } else {                                //lay tat ca
             usersPage = userService.findAll(pageable);
         }
         //response page
         if (usersPage.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         List<UserDTO> userDTOs = new ArrayList<>();
         usersPage.forEach(x -> userDTOs.add(userConverter.toDTO(x)));
@@ -78,7 +83,7 @@ public class HomeController {
     }
 
     /*
-    export excel
+     * export excel
      */
     @GetMapping("/users/export/excel")
     public void exportToExcel(HttpServletResponse response) throws IOException {
@@ -98,7 +103,7 @@ public class HomeController {
     }
 
     /*
-    import excel
+     * import excel
      */
     @GetMapping("/users/import/excel")
     public ResponseEntity<List<UserDTO>> importFromExcel(
@@ -109,7 +114,7 @@ public class HomeController {
     }
 
     /*
-    test search by criteria builder
+     * test search by criteria builder
      */
     @GetMapping("/search")
     public ResponseEntity<?> search(
