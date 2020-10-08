@@ -50,27 +50,26 @@ public class GroupController {
         }
         entity = this.groupService.save(this.groupConverter.toEntity(dto));
         responseMessage.setMessage("Lưu thành công!");
-        return new ResponseEntity(groupConverter.toDTO(entity), HttpStatus.OK);
+        return new ResponseEntity(groupConverter.toDTO(entity), HttpStatus.CREATED);
     }
 
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"EDIT_GROUP\")")
     @PutMapping("/group")
     public ResponseEntity<?> update(@RequestBody GroupDTO dto) {
-        Optional<GroupEntity> entity1 = this.groupService.findById(dto.getId());
+        //get old group from db
+        GroupEntity oldGroup = this.groupService.findById(dto.getId()).orElseThrow(
+                () -> new ResourceNotFoundException("Can not update group with id: " + dto.getId())
+        );
         MessageResponse responseMessage = new MessageResponse();
-        if (!entity1.isPresent()) {
-            responseMessage.setMessage("Không tìm thấy bản ghi!");
-            return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
-        }
-        GroupEntity entity = entity1.get();
+
         Optional<GroupEntity> name = this.groupService.findByName(dto.getName());
-        if (name.isPresent() && !dto.getName().equals(entity.getName())) {
+        if (name.isPresent() && !dto.getName().equals(oldGroup.getName())) {
             responseMessage.setMessage("Trùng tên!");
             return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
         }
-        entity = this.groupService.save(groupConverter.toEntity(dto));
+        oldGroup = this.groupService.save(groupConverter.toEntity(dto));
         responseMessage.setMessage("Sửa thành công");
-        return new ResponseEntity(groupConverter.toDTO(entity), HttpStatus.OK);
+        return new ResponseEntity(groupConverter.toDTO(oldGroup), HttpStatus.OK);
     }
 
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"REMOVE_GROUP\")")
@@ -81,7 +80,7 @@ public class GroupController {
     }
 
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
-    @GetMapping("/groups")
+    @GetMapping("/group")
     public ResponseEntity<?> search(
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "page", required = false, defaultValue = "1") String page,
