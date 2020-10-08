@@ -2,6 +2,7 @@ package com.enao.team2.quanlynhanvien.controller;
 
 import com.enao.team2.quanlynhanvien.converter.GroupConverter;
 import com.enao.team2.quanlynhanvien.dto.GroupDTO;
+import com.enao.team2.quanlynhanvien.exception.NoContentException;
 import com.enao.team2.quanlynhanvien.exception.ResourceNotFoundException;
 import com.enao.team2.quanlynhanvien.messages.MessageResponse;
 import com.enao.team2.quanlynhanvien.model.GroupEntity;
@@ -49,35 +50,32 @@ public class GroupController {
             return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
         }
         entity = this.groupService.save(this.groupConverter.toEntity(dto));
-        responseMessage.setMessage("Lưu thành công!");
-        return new ResponseEntity(groupConverter.toDTO(entity), HttpStatus.OK);
+        return new ResponseEntity(groupConverter.toDTO(entity), HttpStatus.CREATED);
     }
 
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"EDIT_GROUP\")")
     @PutMapping("/group")
     public ResponseEntity<?> update(@RequestBody GroupDTO dto) {
-        Optional<GroupEntity> entity1 = this.groupService.findById(dto.getId());
+        Optional<GroupEntity> old = this.groupService.findById(dto.getId());
         MessageResponse responseMessage = new MessageResponse();
-        if (!entity1.isPresent()) {
-            responseMessage.setMessage("Không tìm thấy bản ghi!");
-            return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
+        if (!old.isPresent()) {
+            throw new ResourceNotFoundException("Not found group with id: " + dto.getId().toString());
         }
-        GroupEntity entity = entity1.get();
+        GroupEntity oldEntity = old.get();
         Optional<GroupEntity> name = this.groupService.findByName(dto.getName());
-        if (name.isPresent() && !dto.getName().equals(entity.getName())) {
+        if (name.isPresent() && !dto.getName().equals(oldEntity.getName())) {
             responseMessage.setMessage("Trùng tên!");
             return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
         }
-        entity = this.groupService.save(groupConverter.toEntity(dto));
-        responseMessage.setMessage("Sửa thành công");
-        return new ResponseEntity(groupConverter.toDTO(entity), HttpStatus.OK);
+        oldEntity = this.groupService.save(groupConverter.toEntity(dto));
+        return new ResponseEntity(groupConverter.toDTO(oldEntity), HttpStatus.CREATED);
     }
 
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"REMOVE_GROUP\")")
     @DeleteMapping("/group/{id}")
     public ResponseEntity<?> delete(@PathVariable(value = "id") UUID id) {
         if (!groupService.checkId(id)){
-            return new ResponseEntity(new MessageResponse("Không tìm thấy bản ghi!"), HttpStatus.OK);
+            throw new ResourceNotFoundException("Not found group with id: " + id.toString());
         }
         GroupEntity groupEntity = groupService.findById(id).get();
         groupEntity.setActive(false);
@@ -117,7 +115,7 @@ public class GroupController {
         }
         //response page
         if (groupsPage.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            throw new NoContentException("No content");
         }
         List<GroupDTO> groupDTOS = new ArrayList<>();
         groupsPage.forEach(x -> groupDTOS.add(groupConverter.toDTO(x)));
