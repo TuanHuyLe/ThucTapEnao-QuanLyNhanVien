@@ -5,8 +5,10 @@ import com.enao.team2.quanlynhanvien.dto.AddUserDTO;
 import com.enao.team2.quanlynhanvien.dto.UserDTO;
 import com.enao.team2.quanlynhanvien.exception.BadRequestException;
 import com.enao.team2.quanlynhanvien.exception.ResourceNotFoundException;
+import com.enao.team2.quanlynhanvien.messages.ErrorMessage;
 import com.enao.team2.quanlynhanvien.model.UserEntity;
 import com.enao.team2.quanlynhanvien.service.IUserService;
+import com.enao.team2.quanlynhanvien.validatation.ValidateUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
@@ -72,8 +76,23 @@ public class UserController {
     }
 
     @PostMapping("/user")
-    public ResponseEntity<?> add(@RequestBody AddUserDTO addUserDTO) {
+    public ResponseEntity<?> add(@RequestBody AddUserDTO addUserDTO, HttpServletResponse response) {
+        if (addUserDTO == null) {
+            throw new BadRequestException("Loi ");
+        }
         UserEntity entity;
+        String[] error = ValidateUser.check(addUserDTO);
+        if (error.length > 0) {
+            ErrorMessage<String[]> errorMessage = new ErrorMessage<>(
+                    LocalDateTime.now(),
+                    HttpStatus.BAD_REQUEST.value(),
+                    error,
+                    ""
+            );
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType("application/json");
+            return ResponseEntity.badRequest().body(errorMessage);
+        }
         Optional<UserEntity> userEntity = userService.findByUsername(addUserDTO.getUsername());
         if (userEntity.isPresent()) {
             throw new BadRequestException("Duplicate user name");
