@@ -30,15 +30,15 @@ public class UserController {
     UserConverter userConverter;
 
     @GetMapping("/user")
-    public ResponseEntity<?> search(
+    public ResponseEntity<?> home(
             @RequestParam(value = "keyword", required = false) String keyword,
-            @RequestParam(value = "type", required = false, defaultValue = "all") String type,
+            @RequestParam(value = "type", required = false) String type,
             @RequestParam(value = "page", required = false, defaultValue = "1") String page,
             @RequestParam(value = "limit", required = false, defaultValue = "5") String limit,
             @RequestParam(value = "sb", required = false, defaultValue = "") String sortBy,
             @RequestParam(value = "asc", required = false, defaultValue = "true") String asc) {
         Pageable pageable;
-        //sort
+        //sort and pagination using pageable
         if (!sortBy.isEmpty()) {
             if (Boolean.parseBoolean(asc)) {
                 pageable = PageRequest.of(Integer.parseInt(page) - 1, Integer.parseInt(limit), Sort.by(sortBy).ascending());
@@ -48,24 +48,27 @@ public class UserController {
         } else {
             pageable = PageRequest.of(Integer.parseInt(page) - 1, Integer.parseInt(limit));
         }
-        Page<UserEntity> userPage;
-        //search
-        if (keyword != null) {
-            userPage = userService.findUsersWithPredicate(keyword, type, pageable);
-        } else {
-            userPage = userService.findAll(pageable);
+        Page<UserEntity> usersPage;
+        //search using predicate
+        if (keyword != null && type != null) {  //tim kiem co type
+            String[] types = type.split("-");
+            usersPage = userService.findUsersWithPredicate(keyword, types, pageable);
+        } else if (keyword != null) {           //tim kiem khong co type
+            usersPage = userService.findUsersWithPredicate(keyword, pageable);
+        } else {                                //lay tat ca
+            usersPage = userService.findAll(pageable);
         }
         //response page
-        if (userPage.isEmpty()) {
-            return ResponseEntity.noContent().build();
+        if (usersPage.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        List<UserDTO> userDTOS = new ArrayList<>();
-        userPage.forEach(x -> userDTOS.add(userConverter.toDTO(x)));
+        List<UserDTO> userDTOs = new ArrayList<>();
+        usersPage.forEach(x -> userDTOs.add(userConverter.toDTO(x)));
         Map<String, Object> response = new HashMap<>();
-        response.put("totalPages", userPage.getTotalPages());
-        response.put("totalItems", userPage.getTotalElements());
-        response.put("currentPage", userPage.getNumber() + 1);
-        response.put("user", userDTOS);
+        response.put("totalPages", usersPage.getTotalPages());
+        response.put("totalItems", usersPage.getTotalElements());
+        response.put("currentPage", usersPage.getNumber() + 1);
+        response.put("users", userDTOs);
         return ResponseEntity.ok(response);
     }
 

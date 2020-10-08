@@ -3,20 +3,32 @@ package com.enao.team2.quanlynhanvien.converter;
 import com.enao.team2.quanlynhanvien.dto.AddUserDTO;
 import com.enao.team2.quanlynhanvien.dto.UserDTO;
 import com.enao.team2.quanlynhanvien.model.GroupEntity;
+import com.enao.team2.quanlynhanvien.model.PositionEntity;
 import com.enao.team2.quanlynhanvien.model.UserEntity;
+import com.enao.team2.quanlynhanvien.service.IGroupService;
+import com.enao.team2.quanlynhanvien.service.IPositionService;
 import com.enao.team2.quanlynhanvien.utils.SlugUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
 public class UserConverter {
     @Autowired
+    IGroupService groupService;
+
+    @Autowired
+    IPositionService positionService;
+
+    @Autowired
     private SlugUtils slugUtils;
 
     public UserEntity toEntity(UserDTO userDTO) {
+        Optional<PositionEntity> positionEntity = positionService.findByName(userDTO.getPositionName());
+        Optional<GroupEntity> groupEntity = groupService.findByName(userDTO.getPositionName());
         UserEntity userEntity = new UserEntity();
         if(userDTO.getId() == null){
             userEntity.setId(UUID.randomUUID());
@@ -38,10 +50,18 @@ public class UserConverter {
         } else {
             userEntity.setGender(true);
         }
+        if(positionEntity.isPresent()){
+            userEntity.setPositions(positionEntity.get());
+        }
+        if(groupEntity.isPresent()){
+            userEntity.setGroup(groupEntity.get());
+        }
         return userEntity;
     }
 
     public UserEntity toEntityWhenAdd(AddUserDTO userDTO) {
+        Optional<PositionEntity> positionEntity = positionService.findByName(userDTO.getPositionName());
+        Optional<GroupEntity> groupEntity = groupService.findByName(userDTO.getPositionName());
         UserEntity userEntity = new UserEntity();
         userEntity.setId(UUID.randomUUID());
         userEntity.setUsername(userDTO.getUsername());
@@ -59,6 +79,12 @@ public class UserConverter {
             userEntity.setGender(userDTO.getGender());
         } else {
             userEntity.setGender(true);
+        }
+        if(positionEntity.isPresent()){
+            userEntity.setPositions(positionEntity.get());
+        }
+        if(groupEntity.isPresent()){
+            userEntity.setGroup(groupEntity.get());
         }
         return userEntity;
     }

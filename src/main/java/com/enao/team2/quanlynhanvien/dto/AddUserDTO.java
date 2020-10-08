@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,4 +16,6 @@ public class AddUserDTO extends AbstractDTO{
     private Boolean gender;
     private String email;
     private String slug;
+    private String groupName;
+    private String positionName;
 }
