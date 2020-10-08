@@ -4,6 +4,7 @@ import com.enao.team2.quanlynhanvien.constants.Constants;
 import com.enao.team2.quanlynhanvien.constants.ESearchKey;
 import com.enao.team2.quanlynhanvien.constants.ESearchOperation;
 import com.enao.team2.quanlynhanvien.dto.SearchCriteria;
+import com.enao.team2.quanlynhanvien.exception.ResourceNotFoundException;
 import com.enao.team2.quanlynhanvien.generic.GenericSpecification;
 import com.enao.team2.quanlynhanvien.model.GroupEntity;
 import com.enao.team2.quanlynhanvien.model.RoleEntity;
@@ -55,7 +56,9 @@ public class RoleService implements IRoleService {
     }
 
     @Override
-    public RoleEntity save(RoleEntity newRoleEntity) { return roleRepository.save(newRoleEntity); }
+    public RoleEntity save(RoleEntity newRoleEntity) {
+        return roleRepository.save(newRoleEntity);
+    }
 
 //    @Override
 //    public MessageResponse delete(UUID roleId) {
