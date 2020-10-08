@@ -2,7 +2,7 @@ package com.enao.team2.quanlynhanvien.controller;
 
 import com.enao.team2.quanlynhanvien.converter.GroupConverter;
 import com.enao.team2.quanlynhanvien.dto.GroupDTO;
-import com.enao.team2.quanlynhanvien.exception.NotFoundException;
+import com.enao.team2.quanlynhanvien.exception.ResourceNotFoundException;
 import com.enao.team2.quanlynhanvien.messages.MessageResponse;
 import com.enao.team2.quanlynhanvien.model.GroupEntity;
 import com.enao.team2.quanlynhanvien.service.IGroupService;
@@ -31,14 +31,13 @@ public class GroupController {
 
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
     @GetMapping("/group/{id}")
-    public ResponseEntity<?> getOne(@PathVariable UUID id) {
-        if (!groupService.checkId(id)){
-            return new ResponseEntity<>(new MessageResponse("Không tìm thấy bản ghi!"), HttpStatus.OK);
-        }
-        GroupEntity groupEntity = groupService.findById(id).get();
-        return new ResponseEntity(groupConverter.toDTO(groupEntity), HttpStatus.OK);
-    }
 
+    public ResponseEntity<GroupDTO> getOne(@PathVariable UUID id) {
+        GroupEntity groupEntity = groupService.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Not found group with id: " + id.toString()));
+        GroupDTO dto = groupConverter.toDTO(groupEntity);
+        return new ResponseEntity(dto, HttpStatus.OK);
+    }
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"ADD_GROUP\")")
     @PostMapping("/group")
     public ResponseEntity<?> save(@RequestBody GroupDTO dto) {

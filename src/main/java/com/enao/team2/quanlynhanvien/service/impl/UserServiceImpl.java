@@ -10,12 +10,15 @@ import com.enao.team2.quanlynhanvien.repository.IUserRepository;
 import com.enao.team2.quanlynhanvien.service.IUserService;
 import com.enao.team2.quanlynhanvien.utils.SlugUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements IUserService {
@@ -35,6 +38,7 @@ public class UserServiceImpl implements IUserService {
         return userRepository.findAll(pageable);
     }
 
+
     @Override
     public UserEntity save(UserEntity userEntity) {
         return userRepository.save(userEntity);
@@ -48,10 +52,11 @@ public class UserServiceImpl implements IUserService {
             if (ESearchKey.group.name().equals(t)) {
                 genericSpecification.add(new SearchCriteria(ESearchKey.group.name(), keyword, ESearchOperation.MATCH, ESearchKey.name.name()));
             } else if (ESearchKey.fullName.name().equals(t)) {
+                //tìm kiếm ko dấu thì chuyển có dấu về ko dấu tìm theo slug
                 if (Constants.VALID_FULL_NAME_REGEX.matcher(keyword).matches()) {
                     String slugKeyword = slugUtils.slug(keyword);
                     genericSpecification.add(new SearchCriteria(ESearchKey.slug.name(), slugKeyword, ESearchOperation.MATCH, null));
-                } else {
+                } else { // tìm kiếm có dấu thì tìm trực tiếp theo full name
                     genericSpecification.add(new SearchCriteria(ESearchKey.fullName.name(), keyword, ESearchOperation.MATCH, null));
                 }
 //            } else if (ESearchKey.gender.name().equals(t)) {
@@ -83,6 +88,18 @@ public class UserServiceImpl implements IUserService {
     @Override
     public Optional<UserEntity> findByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    @Override
+    public Optional<UserEntity> findById(UUID id) {
+        return userRepository.findById(id);
+    }
+
+    @Override
+    public UserEntity deleteSoftById(UserEntity dataDelete) {
+        dataDelete.setActive(false);
+        userRepository.save(dataDelete);
+        return dataDelete;
     }
 
 }

@@ -1,9 +1,8 @@
 package com.enao.team2.quanlynhanvien.security.impl;
 
 import com.enao.team2.quanlynhanvien.exception.ForbiddenException;
-import com.enao.team2.quanlynhanvien.exception.NotFoundException;
+import com.enao.team2.quanlynhanvien.exception.ResourceNotFoundException;
 import com.enao.team2.quanlynhanvien.exception.UnauthorizedException;
-import com.enao.team2.quanlynhanvien.messages.MessageResponse;
 import com.enao.team2.quanlynhanvien.model.PermissionEntity;
 import com.enao.team2.quanlynhanvien.model.RoleEntity;
 import com.enao.team2.quanlynhanvien.security.IAppAuthorizer;
@@ -50,7 +49,7 @@ public class AppAuthorizerImpl implements IAppAuthorizer {
         Optional<PermissionEntity> permissionEntity = permissionService.findByCode(permission);
         //check required permissions
         if (!permissionEntity.isPresent()) {
-            throw new NotFoundException("Permissions not exists");
+            throw new ResourceNotFoundException("Permissions not exists");
         }
         //get role name of user from user detail
         List<String> rolesName = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());

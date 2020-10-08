@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface IUserService {
     /**
@@ -51,4 +52,8 @@ public interface IUserService {
      * @return doi tuong user kieu optional
      */
     Optional<UserEntity> findByUsername(String username);
+
+    Optional<UserEntity> findById(UUID id);
+
+    UserEntity deleteSoftById(UserEntity dataDelete);
 }

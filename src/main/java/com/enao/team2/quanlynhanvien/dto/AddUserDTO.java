@@ -4,11 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDTO extends AbstractDTO {
+public class AddUserDTO extends AbstractDTO{
     private String username;
+    private String password;
     private String fullName;
     private Boolean gender;
     private String email;

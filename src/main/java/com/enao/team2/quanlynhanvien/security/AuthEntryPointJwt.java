@@ -11,19 +11,27 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Component
 public class AuthEntryPointJwt implements AuthenticationEntryPoint {
     private static final Logger logger = LoggerFactory.getLogger(AuthEntryPointJwt.class);
 
+    /**
+     * catch authentication exception
+     * @param request
+     * @param response
+     * @param authException
+     * @throws IOException
+     * @throws ServletException
+     */
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         logger.error("Unauthorized error: {}", authException.getMessage());
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         ErrorMessage errorMessage = new ErrorMessage(
-                new Date(),
+                LocalDateTime.now(),
                 HttpServletResponse.SC_UNAUTHORIZED,
                 authException.getMessage(),
                 "Unauthorized"
