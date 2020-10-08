@@ -24,7 +24,7 @@ public class GroupConverter {
         }
         groupEntity.setDescription(groupDTO.getDescription());
         groupEntity.setName(groupDTO.getName());
-        groupEntity.setSlug(slugUtils.slug(groupDTO.getName()));
+        groupEntity.setSlug(slugUtils.slug(groupDTO.getName() + "-" + groupDTO.getDescription()));
         if (groupDTO.getActive() != null) {
             groupEntity.setActive(groupDTO.getActive());
         } else {

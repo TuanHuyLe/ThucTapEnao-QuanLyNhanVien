@@ -8,4 +8,5 @@ public enum ESearchKey {
     name,
     group,
     gender,
+    description,
 }
