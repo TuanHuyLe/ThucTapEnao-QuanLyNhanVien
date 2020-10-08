@@ -11,23 +11,7 @@ import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class ControllerExceptionHandler {
-    /**
-     * exception no content - status 204
-     * @param ex
-     * @param request
-     * @return
-     */
-    @ExceptionHandler(value = {NoContentException.class})
-    @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public ErrorMessage noContentException(NoContentException ex, WebRequest request) {
-        ErrorMessage message = new ErrorMessage(
-                LocalDateTime.now(),
-                HttpStatus.NO_CONTENT.value(),
-                ex.getMessage(),
-                request.getDescription(false));
 
-        return message;
-    }
 
     /**
      * exception resource not found - status 404

@@ -2,12 +2,12 @@ package com.enao.team2.quanlynhanvien.controller;
 
 import com.enao.team2.quanlynhanvien.converter.UserConverter;
 import com.enao.team2.quanlynhanvien.dto.AddUserDTO;
-import com.enao.team2.quanlynhanvien.dto.PositionDTO;
 import com.enao.team2.quanlynhanvien.dto.UserDTO;
+import com.enao.team2.quanlynhanvien.exception.ResourceNotFoundException;
 import com.enao.team2.quanlynhanvien.messages.MessageResponse;
-import com.enao.team2.quanlynhanvien.model.PositionEntity;
 import com.enao.team2.quanlynhanvien.model.UserEntity;
 import com.enao.team2.quanlynhanvien.service.IUserService;
+import com.enao.team2.quanlynhanvien.service.impl.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,9 +15,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -28,6 +31,14 @@ public class UserController {
 
     @Autowired
     UserConverter userConverter;
+
+    @GetMapping("/user/{id}")
+    public ResponseEntity<?> getOne(@PathVariable UUID id){
+        UserEntity userEntity = userService.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Not found user with id: " + id.toString()));
+        UserDTO dto = userConverter.toDTO(userEntity);
+        return new ResponseEntity(dto, HttpStatus.OK);
+    }
 
     @GetMapping("/user")
     public ResponseEntity<?> home(
@@ -80,7 +91,18 @@ public class UserController {
         if(userEntity.isPresent()){
             return new ResponseEntity<>(HttpStatus.valueOf("duplicate user name"));
         }
-        entity = this.userService.save(this.userConverter.toEntityWhenAdd(addUserDTO));
+        UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<String> rolesName = user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
+        Boolean isAdmin = rolesName.contains("ROLE_FULL");
+        if(isAdmin) {
+            entity = this.userService.save(this.userConverter.toEntityWhenAdd(addUserDTO));
+        }else{
+            UserEntity currentUser = userService.findById(user.getId())
+                    .orElseThrow(()->new ResourceNotFoundException("Can not found group with id: " + user.getId()));
+            UserEntity newUser = this.userConverter.toEntityWhenAdd(addUserDTO);
+            newUser.setGroup(currentUser.getGroup());
+            entity = this.userService.save(newUser);
+        }
         responseMessage.setMessage("Lưu thành công!");
         return new ResponseEntity(userConverter.toDTO(entity), HttpStatus.OK);
     }
