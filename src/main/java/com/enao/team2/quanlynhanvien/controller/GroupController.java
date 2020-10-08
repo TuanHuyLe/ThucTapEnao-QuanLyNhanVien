@@ -2,7 +2,7 @@ package com.enao.team2.quanlynhanvien.controller;
 
 import com.enao.team2.quanlynhanvien.converter.GroupConverter;
 import com.enao.team2.quanlynhanvien.dto.GroupDTO;
-import com.enao.team2.quanlynhanvien.exception.NotFoundException;
+import com.enao.team2.quanlynhanvien.exception.ResourceNotFoundException;
 import com.enao.team2.quanlynhanvien.messages.MessageResponse;
 import com.enao.team2.quanlynhanvien.model.GroupEntity;
 import com.enao.team2.quanlynhanvien.service.IGroupService;
@@ -33,7 +33,7 @@ public class GroupController {
     @GetMapping("/group/{id}")
     public ResponseEntity<GroupDTO> getOne(@PathVariable UUID id) {
         GroupEntity groupEntity = groupService.findById(id).orElseThrow(
-                () -> new NotFoundException("Not found group with id: " + id.toString()));
+                () -> new ResourceNotFoundException("Not found group with id: " + id.toString()));
         GroupDTO dto = groupConverter.toDTO(groupEntity);
         return new ResponseEntity(dto, HttpStatus.OK);
     }

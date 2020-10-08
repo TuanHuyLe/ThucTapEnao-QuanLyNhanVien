@@ -48,10 +48,11 @@ public class UserServiceImpl implements IUserService {
             if (ESearchKey.group.name().equals(t)) {
                 genericSpecification.add(new SearchCriteria(ESearchKey.group.name(), keyword, ESearchOperation.MATCH, ESearchKey.name.name()));
             } else if (ESearchKey.fullName.name().equals(t)) {
+                //tìm kiếm ko dấu thì chuyển có dấu về ko dấu tìm theo slug
                 if (Constants.VALID_FULL_NAME_REGEX.matcher(keyword).matches()) {
                     String slugKeyword = slugUtils.slug(keyword);
                     genericSpecification.add(new SearchCriteria(ESearchKey.slug.name(), slugKeyword, ESearchOperation.MATCH, null));
-                } else {
+                } else { // tìm kiếm có dấu thì tìm trực tiếp theo full name
                     genericSpecification.add(new SearchCriteria(ESearchKey.fullName.name(), keyword, ESearchOperation.MATCH, null));
                 }
 //            } else if (ESearchKey.gender.name().equals(t)) {
