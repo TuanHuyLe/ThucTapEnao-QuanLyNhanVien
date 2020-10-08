@@ -1,11 +1,8 @@
 package com.enao.team2.quanlynhanvien.controller;
 
 import com.enao.team2.quanlynhanvien.converter.RoleConverter;
-import com.enao.team2.quanlynhanvien.dto.GroupDTO;
 import com.enao.team2.quanlynhanvien.dto.RoleDTO;
 import com.enao.team2.quanlynhanvien.messages.MessageResponse;
-import com.enao.team2.quanlynhanvien.model.GroupEntity;
-import com.enao.team2.quanlynhanvien.model.PermissionEntity;
 import com.enao.team2.quanlynhanvien.model.RoleEntity;
 import com.enao.team2.quanlynhanvien.service.IPermissionService;
 import com.enao.team2.quanlynhanvien.service.IRoleService;
@@ -34,36 +31,31 @@ public class RoleController {
     @Autowired
     IPermissionService permissionService;
 
-    @GetMapping("/roles")
-    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_ROLE\")")
-    public List<RoleEntity> listAll() {
-    List<RoleEntity> re = this.roleService.findAll();
-    List<RoleDTO> list = new ArrayList();
-    re.forEach(x -> list.add(roleConverter.toDTO(x)));
-    return re;
-    }
+//    @GetMapping("/roles")
+//    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_ROLE\")")
+//    public List<RoleEntity> listAll() {
+//    List<RoleEntity> re = this.roleService.findAll();
+//    List<RoleDTO> list = new ArrayList();
+//    re.forEach(x -> list.add(roleConverter.toDTO(x)));
+//    return re;
+//    }
 
-    @GetMapping("/rolesPage")
-    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_ROLE\")")
-    public Page<RoleDTO> getList(@RequestParam(value = "page") int page, @RequestParam(value = "limit") int limit){
-        Page<RoleEntity> pag = this.roleService.getByPage(page, limit);
-        Page<RoleDTO> pagee = this.roleConverter.toPageDTO(pag);
-        return pagee;
-    }
+//    @GetMapping("/rolesPage")
+//    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_ROLE\")")
+//    public Page<RoleDTO> getList(@RequestParam(value = "page") int page, @RequestParam(value = "limit") int limit){
+//        Page<RoleEntity> pag = this.roleService.getByPage(page, limit);
+//        Page<RoleDTO> pagee = this.roleConverter.toPageDTO(pag);
+//        return pagee;
+//    }
 
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_ROLE\")")
     @GetMapping("/role/{id}")
-    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_ROLE\")")
-    public ResponseEntity<RoleDTO> getOne(@PathVariable UUID id){
-        RoleDTO dto = new RoleDTO();
-//            ResponseMessage responseMessage = new ResponseMessage();
-        dto = this.roleConverter.toDTO(this.roleService.getOne(id));
-//            Optional<RoleEntity> optionalRoleEntity = this.roleService.findById(id);
-//            if (!optionalRoleEntity.isPresent()){
-//                responseMessage.setMessage("Không tìm thấy bản ghi!");
-//                return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
-//            }
-//            else{
-        return new ResponseEntity(dto, HttpStatus.OK);
+    public ResponseEntity<?> getOne(@PathVariable UUID id) {
+        if (!roleService.checkId(id)){
+            return new ResponseEntity<>(new MessageResponse("Không tìm thấy bản ghi!"), HttpStatus.OK);
+        }
+        RoleEntity roleEntity = roleService.findById(id).get();
+        return new ResponseEntity(roleConverter.toDTO(roleEntity), HttpStatus.OK);
     }
 
     @PostMapping("/role")
@@ -83,22 +75,29 @@ public class RoleController {
             }
     }
 
-    @PutMapping("/role/{id}")
+    @PutMapping("/role")
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"EDIT_ROLE\")")
-    public ResponseEntity<?> update(@RequestBody RoleDTO dto, @PathVariable UUID id){
-        RoleEntity entity = this.roleService.getOne(id);
-        Optional<RoleEntity> name = this.roleService.findByName(dto.getName());
+    public ResponseEntity<?> update(@RequestBody RoleDTO dto){
+        Optional<RoleEntity> entity = this.roleService.findById(dto.getId());
         MessageResponse responseMessage = new MessageResponse();
-        if (name.isPresent() && (!dto.getName().equals(entity.getName()))){
+        RoleEntity roleEntity= entity.get();
+        Optional<RoleEntity> name = this.roleService.findByName(dto.getName());
+        if(!entity.isPresent()) {
+            responseMessage.setMessage("Không tìm thấy bản ghi!");
+            return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
+        }
+        if (name.isPresent() && !dto.getName().equals(roleEntity.getName())){
             responseMessage.setMessage("Trùng tên");
             return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
         }
         else{
-            dto.setId(entity.getId());
-            dto.setActive(entity.getActive());
-            this.roleService.save(this.roleConverter.toEntity(dto));
-            responseMessage.setMessage("Sửa thành công!");
-            return new ResponseEntity(responseMessage.getMessage() + entity, HttpStatus.OK);
+//            dto.setId(roleEntity.getId());
+//            dto.setActive(roleEntity.getActive());
+            roleEntity = this.roleService.save(this.roleConverter.toEntity(dto));
+            return new ResponseEntity(roleConverter.toDTO(roleEntity), HttpStatus.OK);
+
+            //responseMessage.setMessage("Sửa thành công!");
+            //return new ResponseEntity(responseMessage.getMessage() + entity, HttpStatus.OK);
         }
 
     }
@@ -106,14 +105,23 @@ public class RoleController {
     @DeleteMapping("/role/{id}")
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"REMOVE_ROLE\")")
     public ResponseEntity<MessageResponse> delete(@PathVariable(value = "id") UUID id){
-        MessageResponse responseMessage = this.roleService.delete(id);
+        MessageResponse responseMessage = new MessageResponse();
+        RoleEntity roleEntity = roleService.findById(id).get();
+        if (!roleService.checkId(id)){
+            return new ResponseEntity(new MessageResponse("Không tìm thấy bản ghi!"), HttpStatus.OK);
+        }
+        else
+        roleEntity.setActive(false);
+        roleService.save(roleEntity);
+        responseMessage.setMessage("Xóa thành công!");
         return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
     }
 
-    @GetMapping("/role")
+    @GetMapping("/roles")
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_ROLE\")")
     public ResponseEntity<?> search(
             @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "type", required = false, defaultValue = "all") String type,
             @RequestParam(value = "page", required = false, defaultValue = "1") String page,
             @RequestParam(value = "limit", required = false, defaultValue = "5") String limit,
             @RequestParam(value = "sb", required = false, defaultValue = "") String sortBy,
@@ -132,21 +140,21 @@ public class RoleController {
         Page<RoleEntity> rolesPage;
         //search
         if (keyword != null) {
-            rolesPage = roleService.findRolesWithPredicate(keyword, pageable);
+            rolesPage = roleService.findGroupsWithPredicate(keyword, type, pageable);
         } else {
             rolesPage = roleService.findAll(pageable);
         }
         //response page
-        List<RoleDTO> roleDTOs = new ArrayList<>();
-        rolesPage.forEach(x -> roleDTOs.add(roleConverter.toDTO(x)));
-        if (roleDTOs.isEmpty()) {
+        if (rolesPage.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
+        List<RoleDTO> roleDTOS = new ArrayList<>();
+        rolesPage.forEach(x -> roleDTOS.add(roleConverter.toDTO(x)));
         Map<String, Object> response = new HashMap<>();
         response.put("totalPages", rolesPage.getTotalPages());
         response.put("totalItems", rolesPage.getTotalElements());
         response.put("currentPage", rolesPage.getNumber() + 1);
-        response.put("groups", roleDTOs);
+        response.put("roles", roleDTOS);
         return ResponseEntity.ok(response);
     }
 }

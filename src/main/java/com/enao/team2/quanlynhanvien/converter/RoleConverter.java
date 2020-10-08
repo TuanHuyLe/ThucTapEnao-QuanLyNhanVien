@@ -25,11 +25,14 @@ public class RoleConverter {
         RoleEntity roleEntity = new RoleEntity();
         List<PermissionEntity> listPermissionEntity = new ArrayList();
         List<String> listPermissionId = roleDTO.getPermissionIds();
-        for(String permissionId : listPermissionId){
-            Optional<PermissionEntity> permissionEntity = permissionService.findByCode(permissionId);
-            listPermissionEntity.add(permissionEntity.get());
+        if(!listPermissionId.isEmpty()){
+            for(String permissionId : listPermissionId){
+                Optional<PermissionEntity> permissionEntity = permissionService.findByCode(permissionId);
+                listPermissionEntity.add(permissionEntity.get());
+            }
+            Set<PermissionEntity> setPer = new HashSet<>(listPermissionEntity);
+            roleEntity.setPermissions(setPer);
         }
-        Set<PermissionEntity> setPer = new HashSet<>(listPermissionEntity);
         if (roleDTO.getId() != null) {
             roleEntity.setId(roleDTO.getId());
         } else {
@@ -38,7 +41,6 @@ public class RoleConverter {
         roleEntity.setDescription(roleDTO.getDescription());
         roleEntity.setName(roleDTO.getName());
         roleEntity.setSlug(slugUtils.slug(roleDTO.getName()));
-        roleEntity.setPermissions(setPer);
         if (roleDTO.getActive() != null) {
             roleEntity.setActive(roleDTO.getActive());
         } else {
