@@ -49,7 +49,7 @@ public class DatabaseSeeder {
     @Autowired
     private GroupConverter groupConverter;
 
-//    @EventListener
+    @EventListener
     @Transactional
     public void seed(ContextRefreshedEvent event) {
         try {
