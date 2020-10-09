@@ -4,19 +4,31 @@ import com.enao.team2.quanlynhanvien.dto.AddUserDTO;
 import com.enao.team2.quanlynhanvien.dto.UserDTO;
 import com.enao.team2.quanlynhanvien.model.GroupEntity;
 import com.enao.team2.quanlynhanvien.model.PositionEntity;
+import com.enao.team2.quanlynhanvien.model.RoleEntity;
 import com.enao.team2.quanlynhanvien.model.UserEntity;
 import com.enao.team2.quanlynhanvien.service.IGroupService;
 import com.enao.team2.quanlynhanvien.service.IPositionService;
+import com.enao.team2.quanlynhanvien.service.IRoleService;
+import com.enao.team2.quanlynhanvien.service.IUserService;
+import com.enao.team2.quanlynhanvien.service.impl.UserDetailsImpl;
 import com.enao.team2.quanlynhanvien.utils.SlugUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class UserConverter {
+    @Autowired
+    IRoleService roleService;
+
+    @Autowired
+    IUserService userService;
+
     @Autowired
     IGroupService groupService;
 
@@ -61,7 +73,7 @@ public class UserConverter {
 
     public UserEntity toEntityWhenAdd(AddUserDTO userDTO) {
         Optional<PositionEntity> positionEntity = positionService.findByName(userDTO.getPositionName());
-        Optional<GroupEntity> groupEntity = groupService.findByName(userDTO.getPositionName());
+        Optional<GroupEntity> groupEntity = groupService.findByName(userDTO.getGroupName());
         UserEntity userEntity = new UserEntity();
         userEntity.setId(UUID.randomUUID());
         userEntity.setUsername(userDTO.getUsername());
@@ -83,7 +95,7 @@ public class UserConverter {
         if(positionEntity.isPresent()){
             userEntity.setPositions(positionEntity.get());
         }
-        if(groupEntity.isPresent()){
+        if(groupEntity.isPresent()) {
             userEntity.setGroup(groupEntity.get());
         }
         return userEntity;
@@ -102,7 +114,7 @@ public class UserConverter {
             userDTO.setGroupName(userEntity.getGroup().getName());
         }
         if (userEntity.getPositions() != null) {
-            userDTO.setGroupName(userEntity.getPositions().getName());
+            userDTO.setPositionName(userEntity.getPositions().getName());
         }
         return userDTO;
     }
