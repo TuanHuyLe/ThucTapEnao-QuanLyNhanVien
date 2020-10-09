@@ -1,16 +1,22 @@
 package com.enao.team2.quanlynhanvien.controller;
 
 import com.enao.team2.quanlynhanvien.constants.Constants;
+import com.enao.team2.quanlynhanvien.dto.EmailDTO;
+import com.enao.team2.quanlynhanvien.exception.BadRequestException;
+import com.enao.team2.quanlynhanvien.messages.MessageResponse;
+import com.enao.team2.quanlynhanvien.service.mail.EmailService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/api/group1")
+@RequestMapping("/api/admin")
 public class AdminController {
+
+    @Autowired
+    private EmailService emailService;
 
     @GetMapping("/list")
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"" +
@@ -25,4 +31,19 @@ public class AdminController {
     public String addGroup() {
         return "add";
     }
+
+    /**
+     * send email
+     *
+     * @param emailDTO
+     * @return
+     */
+    @PostMapping("/email")
+    public ResponseEntity<?> sendEmail(@RequestBody EmailDTO emailDTO) {
+        if (emailService.sendMail(emailDTO)) {
+            return ResponseEntity.ok(new MessageResponse("Sent email"));
+        }
+        throw new BadRequestException("Email is invalid!");
+    }
+
 }
