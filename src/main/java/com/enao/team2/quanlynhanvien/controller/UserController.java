@@ -38,7 +38,7 @@ public class UserController {
     UserConverter userConverter;
 
     @GetMapping("/user/{id}")
-    public ResponseEntity<?> getOne(@PathVariable UUID id){
+    public ResponseEntity<?> getOne(@PathVariable UUID id) {
         UserEntity userEntity = userService.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Not found user with id: " + id.toString()));
         UserDTO dto = userConverter.toDTO(userEntity);
@@ -90,14 +90,11 @@ public class UserController {
 
     @PostMapping("/user")
     public ResponseEntity<?> add(@RequestBody AddUserDTO addUserDTO, HttpServletResponse response) {
-        if (addUserDTO == null) {
-            throw new BadRequestException("Loi ");
-        }
         UserEntity entity;
         MessageResponse responseMessage = new MessageResponse();
-        String[] error = ValidateUser.check(addUserDTO);
-        if (error.length > 0) {
-            ErrorMessage<String[]> errorMessage = new ErrorMessage<>(
+        List<String> error = ValidateUser.check(addUserDTO);
+        if (!error.isEmpty()) {
+            ErrorMessage<List<String>> errorMessage = new ErrorMessage<>(
                     LocalDateTime.now(),
                     HttpStatus.BAD_REQUEST.value(),
                     error,
@@ -113,12 +110,12 @@ public class UserController {
         }
         UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<String> rolesName = user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
-        Boolean isAdmin = rolesName.contains("ROLE_FULL");
-        if(isAdmin) {
+        boolean isAdmin = rolesName.contains("ROLE_FULL");
+        if (isAdmin) {
             entity = this.userService.save(this.userConverter.toEntityWhenAdd(addUserDTO));
-        }else{
+        } else {
             UserEntity currentUser = userService.findById(user.getId())
-                    .orElseThrow(()->new ResourceNotFoundException("Can not found group with id: " + user.getId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Can not found group with id: " + user.getId()));
             UserEntity newUser = this.userConverter.toEntityWhenAdd(addUserDTO);
             newUser.setGroup(currentUser.getGroup());
             entity = this.userService.save(newUser);
@@ -138,7 +135,11 @@ public class UserController {
                 throw new BadRequestException("Username is exists!");
             }
         }
-        return new ResponseEntity<>(userService.save(userConverter.toEntity(userRequest)), HttpStatus.OK);
+        UserEntity userEntity = userConverter.toEntity(userRequest);
+        userEntity.setPassword(dataMustBeUpdate.getPassword());
+        userEntity.setGroup(dataMustBeUpdate.getGroup());
+        userEntity.setPositions(dataMustBeUpdate.getPositions());
+        return new ResponseEntity<>(userService.save(userEntity), HttpStatus.OK);
     }
 
     @DeleteMapping("/user/{id}")

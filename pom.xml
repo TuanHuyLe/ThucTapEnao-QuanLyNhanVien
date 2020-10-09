@@ -19,6 +19,12 @@
 	</properties>
 
 	<dependencies>
+		<!--redis client-->
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+			<version>2.9.0</version>
+		</dependency>
 		<!--send mail-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
