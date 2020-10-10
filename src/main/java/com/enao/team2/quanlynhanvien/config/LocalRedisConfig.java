@@ -6,18 +6,26 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import redis.clients.jedis.Protocol;
 
+import java.net.URI;
 import java.net.URISyntaxException;
 
 //@Configuration
 public class LocalRedisConfig {
-//    @Bean
-    public RedisConnectionFactory jedisConnectionFactory() throws URISyntaxException {
-        JedisConnectionFactory redisConnectionFactory = new JedisConnectionFactory();
-        redisConnectionFactory.setHostName("ec2-34-200-124-128.compute-1.amazonaws.com");
-        redisConnectionFactory.setPort(21489);
-        redisConnectionFactory.setTimeout(Protocol.DEFAULT_TIMEOUT);
-        redisConnectionFactory.setPassword("p2423039d60a44d647d414a858cb4a24414d498aad7f3d8752538f7f7bd50087b");
-
-        return redisConnectionFactory;
-    }
+//     @Bean
+//    public RedisConnectionFactory redisConnectionFactory() {
+//
+//        try {
+//            URI redisUri = new URI(System.getenv("redis-16702.c44.us-east-1-2.ec2.cloud.redislabs.com:16702"));
+//            JedisConnectionFactory redisConnectionFactory = new JedisConnectionFactory();
+//            redisConnectionFactory.setHostName(redisUri.getHost());
+//            redisConnectionFactory.setPort(redisUri.getPort());
+//            redisConnectionFactory.setTimeout(Protocol.DEFAULT_TIMEOUT);
+//            redisConnectionFactory.setPassword(redisUri.getUserInfo().split(":",2)[1]);
+//
+//        return redisConnectionFactory;
+//        } catch (URISyntaxException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
 }

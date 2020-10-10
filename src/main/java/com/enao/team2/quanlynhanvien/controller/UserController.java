@@ -106,13 +106,17 @@ public class UserController {
         }
         Optional<UserEntity> userEntity = userService.findByUsername(addUserDTO.getUsername());
         if (userEntity.isPresent()) {
-            throw new BadRequestException("Duplicate user name");
+            throw new BadRequestException("Username is exists!");
         }
         UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<String> rolesName = user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
         boolean isAdmin = rolesName.contains("ROLE_FULL");
         if (isAdmin) {
-            entity = this.userService.save(this.userConverter.toEntityWhenAdd(addUserDTO));
+            if (addUserDTO.getGroupName() == null) {
+                throw new BadRequestException("Group is required!");
+            } else {
+                entity = this.userService.save(this.userConverter.toEntityWhenAdd(addUserDTO));
+            }
         } else {
             UserEntity currentUser = userService.findById(user.getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Can not found group with id: " + user.getId()));
@@ -120,7 +124,7 @@ public class UserController {
             newUser.setGroup(currentUser.getGroup());
             entity = this.userService.save(newUser);
         }
-        responseMessage.setMessage("Lưu thành công!");
+        responseMessage.setMessage("Save successfully!");
         return new ResponseEntity(userConverter.toDTO(entity), HttpStatus.OK);
     }
 
@@ -139,7 +143,7 @@ public class UserController {
         userEntity.setPassword(dataMustBeUpdate.getPassword());
         userEntity.setGroup(dataMustBeUpdate.getGroup());
         userEntity.setPositions(dataMustBeUpdate.getPositions());
-        return new ResponseEntity<>(userService.save(userEntity), HttpStatus.OK);
+        return new ResponseEntity<>(userConverter.toDTO(userService.save(userEntity)), HttpStatus.OK);
     }
 
     @DeleteMapping("/user/{id}")
@@ -149,7 +153,7 @@ public class UserController {
             UserEntity dataDelete = dataMustBeDelete.get();
             return new ResponseEntity(userConverter.toDTO(userService.deleteSoftById(dataDelete)), HttpStatus.OK);
         } else {
-            throw new ResourceNotFoundException("Can not delete user with id: " + id);
+            throw new ResourceNotFoundException("Can not find user id: " + id);
         }
     }
 

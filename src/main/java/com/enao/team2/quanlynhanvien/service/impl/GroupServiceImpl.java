@@ -58,13 +58,14 @@ public class GroupServiceImpl implements IGroupService {
     @Override
     public MessageResponse delete(UUID id) {
         MessageResponse message = new MessageResponse();
-        GroupEntity entity = (GroupEntity) this.groupRepository.getOne(id);
+        GroupEntity entity = this.groupRepository.getOne(id);
         Optional<GroupEntity> groupEntity = this.groupRepository.findById(id);
         try {
             if (!groupEntity.isPresent()) {
                 message.setMessage("Không tìm thấy bản ghi!");
             } else {
-                this.groupRepository.delete(entity);
+                entity.setActive(false);
+                groupRepository.save(entity);
                 message.setMessage("Xóa thành công");
             }
         } catch (Exception e) {
@@ -81,7 +82,6 @@ public class GroupServiceImpl implements IGroupService {
 
     @Override
     public Optional<GroupEntity> findById(UUID id) {
-//        return this.groupRepository.getOne(id);
         return this.groupRepository.findById(id);
     }
 

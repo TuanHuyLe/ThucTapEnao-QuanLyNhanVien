@@ -24,6 +24,9 @@ public class ValidateUser {
         if (userDTO.getEmail() == null || !Constants.VALID_EMAIL_ADDRESS_REGEX.matcher(userDTO.getEmail()).matches()) {
             error.add("Email is invalid!");
         }
+        if (userDTO.getPositionName() == null) {
+            error.add("Position is required!");
+        }
         return error;
     }
 }
