@@ -83,6 +83,7 @@ public class GroupController {
     @GetMapping("/group")
     public ResponseEntity<?> search(
             @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "type", required = false) String type,
             @RequestParam(value = "page", required = false, defaultValue = "1") String page,
             @RequestParam(value = "limit", required = false, defaultValue = "5") String limit,
             @RequestParam(value = "sb", required = false, defaultValue = "") String sortBy,

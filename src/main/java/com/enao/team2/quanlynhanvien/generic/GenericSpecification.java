@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GenericSpecification<T> implements Specification<T> {
-    private List<SearchCriteria> list;
+    private final List<SearchCriteria> list;
 
     public GenericSpecification() {
         this.list = new ArrayList<>();
@@ -20,16 +20,6 @@ public class GenericSpecification<T> implements Specification<T> {
 
     public void add(SearchCriteria criteria) {
         list.add(criteria);
-    }
-
-    @Override
-    public Specification<T> and(Specification<T> other) {
-        return null;
-    }
-
-    @Override
-    public Specification<T> or(Specification<T> other) {
-        return null;
     }
 
     @Override
