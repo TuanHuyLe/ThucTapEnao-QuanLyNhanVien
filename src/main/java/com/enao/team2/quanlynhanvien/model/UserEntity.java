@@ -41,7 +41,7 @@ public class UserEntity extends AuditableEntity<UUID> {
     @ManyToOne(fetch = FetchType.LAZY)
     private GroupEntity group;
 
-    //many to one positon
+    //many to one position
     @ManyToOne(fetch = FetchType.LAZY)
     private PositionEntity positions;
 

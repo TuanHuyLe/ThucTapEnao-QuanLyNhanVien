@@ -2,8 +2,12 @@ package com.enao.team2.quanlynhanvien.controller;
 
 import com.enao.team2.quanlynhanvien.converter.PositionConverter;
 import com.enao.team2.quanlynhanvien.dto.PositionDTO;
+import com.enao.team2.quanlynhanvien.dto.UserDTO;
+import com.enao.team2.quanlynhanvien.exception.BadRequestException;
+import com.enao.team2.quanlynhanvien.exception.ResourceNotFoundException;
 import com.enao.team2.quanlynhanvien.messages.MessageResponse;
 import com.enao.team2.quanlynhanvien.model.PositionEntity;
+import com.enao.team2.quanlynhanvien.model.UserEntity;
 import com.enao.team2.quanlynhanvien.service.IPositionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,9 +30,16 @@ public class PositionController {
     @Autowired
     PositionConverter positionConverter;
 
+    @GetMapping("/position/{id}")
+    public ResponseEntity<?> getOne(@PathVariable UUID id) {
+        PositionEntity positionEntity = positionService.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Not found position with id: " + id.toString()));
+        PositionDTO dto = positionConverter.toDTO(positionEntity);
+        return new ResponseEntity(dto, HttpStatus.OK);
+    }
+
     @GetMapping("/position")
     public ResponseEntity<?> search(
-            @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "page", required = false, defaultValue = "1") String page,
             @RequestParam(value = "limit", required = false, defaultValue = "5") String limit,
             @RequestParam(value = "sb", required = false, defaultValue = "") String sortBy,
@@ -44,13 +55,8 @@ public class PositionController {
         } else {
             pageable = PageRequest.of(Integer.parseInt(page) - 1, Integer.parseInt(limit));
         }
-        Page<PositionEntity> positionPage;
-        //search
-        if (keyword != null) {
-            positionPage = positionService.findGroupsWithPredicate(keyword, pageable);
-        } else {
-            positionPage = positionService.findAll(pageable);
-        }
+        Page<PositionEntity> positionPage = positionService.findAll(pageable);
+
         //response page
         List<PositionDTO> positionDTOS = new ArrayList<>();
         positionPage.forEach(x -> positionDTOS.add(positionConverter.toDTO(x)));
@@ -66,47 +72,35 @@ public class PositionController {
     }
 
     @PostMapping("/position")
-    public ResponseEntity<?> add(@RequestBody PositionDTO positionDTO){
+    public ResponseEntity<?> add(@RequestBody PositionDTO positionDTO) {
         PositionEntity entity;
-        MessageResponse responseMessage = new MessageResponse();
-        Optional<PositionEntity> name = positionService.findByName(positionDTO.getName());
-        if (name.isPresent()) {
-            responseMessage.setMessage("Trùng tên!");
-            return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
-        }
+        positionService.findByName(positionDTO.getName())
+                .orElseThrow(() -> new BadRequestException("Name is exists!"));
+
         entity = this.positionService.save(this.positionConverter.toEntity(positionDTO));
-        responseMessage.setMessage("Lưu thành công!");
-        return new ResponseEntity(positionConverter.toDTO(entity), HttpStatus.OK);
+        return new ResponseEntity(positionConverter.toDTO(entity), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/position/{id}")
-    public ResponseEntity<?> delete(@PathVariable UUID id){
+    public ResponseEntity<?> delete(@PathVariable UUID id) {
         Optional<PositionEntity> dataMustBeDelete = positionService.findById(id);
-        if(dataMustBeDelete.isPresent()){
+        if (dataMustBeDelete.isPresent()) {
             PositionEntity dataDelete = dataMustBeDelete.get();
             return new ResponseEntity(positionService.deleteSoftById(dataDelete), HttpStatus.OK);
-        }else{
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        throw new ResourceNotFoundException("Can not find position id: " + id);
     }
 
     @PutMapping("/position")
-    public ResponseEntity<?> update(@RequestBody PositionDTO positionDTO){
-        Optional<PositionEntity> entity1 = this.positionService.findById(positionDTO.getId());
-        MessageResponse responseMessage = new MessageResponse();
-        if (!entity1.isPresent()){
-            responseMessage.setMessage("Không tìm thấy bản ghi!");
-            return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
-        }
-        PositionEntity entity = entity1.get();
+    public ResponseEntity<?> update(@RequestBody PositionDTO positionDTO) {
+        PositionEntity entity = this.positionService.findById(positionDTO.getId())
+                .orElseThrow(() -> new BadRequestException("Can not update position id: " + positionDTO.getId()));
         Optional<PositionEntity> name = this.positionService.findByName(positionDTO.getName());
         if (name.isPresent() && !positionDTO.getName().equals(entity.getName())) {
-            responseMessage.setMessage("Trùng tên!");
-            return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
+            throw new BadRequestException("Name is exists!");
         }
         entity = this.positionService.save(positionConverter.toEntity(positionDTO));
-        responseMessage.setMessage("Sửa thành công");
-        return new ResponseEntity(positionConverter.toDTO(entity), HttpStatus.OK);
+        return ResponseEntity.ok(positionConverter.toDTO(entity));
     }
 
 }

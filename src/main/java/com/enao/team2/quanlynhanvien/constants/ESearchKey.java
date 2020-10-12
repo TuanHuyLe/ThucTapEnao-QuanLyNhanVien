@@ -1,6 +1,7 @@
 package com.enao.team2.quanlynhanvien.constants;
 
 public enum ESearchKey {
+    id,
     username,
     fullName,
     slug,

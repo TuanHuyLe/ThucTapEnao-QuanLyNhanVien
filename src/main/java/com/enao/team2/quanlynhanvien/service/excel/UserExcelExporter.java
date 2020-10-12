@@ -1,4 +1,4 @@
-package com.enao.team2.quanlynhanvien.utils.excel;
+package com.enao.team2.quanlynhanvien.service.excel;
 
 import com.enao.team2.quanlynhanvien.model.RoleEntity;
 import com.enao.team2.quanlynhanvien.model.UserEntity;
@@ -26,8 +26,8 @@ public class UserExcelExporter {
         sheet = excelExporter.getSheet();
     }
 
-    /*
-    write header line
+    /**
+     * write header line
      */
     private void writeHeaderLine() {
         //init row start
@@ -58,8 +58,8 @@ public class UserExcelExporter {
 
     }
 
-    /*
-    write data to table
+    /**
+     * write data to table
      */
     private void writeDataLines() {
         int stt = 1;
@@ -99,8 +99,8 @@ public class UserExcelExporter {
         }
     }
 
-    /*
-    export excel
+    /**
+     * export excel
      */
     public void export(HttpServletResponse response) throws IOException {
         writeHeaderLine();
