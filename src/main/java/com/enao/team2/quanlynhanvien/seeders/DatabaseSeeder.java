@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
-@Component
+//@Component
 public class DatabaseSeeder {
     private static final Logger logger = LoggerFactory.getLogger(DatabaseSeeder.class);
 
@@ -49,7 +49,7 @@ public class DatabaseSeeder {
     @Autowired
     private GroupConverter groupConverter;
 
-    @EventListener
+//    @EventListener
     @Transactional
     public void seed(ContextRefreshedEvent event) {
         try {
