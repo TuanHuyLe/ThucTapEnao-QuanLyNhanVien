@@ -10,7 +10,7 @@ public class Constants {
     public static final Pattern VALID_USERNAME_REGEX =
             Pattern.compile("\\w+", Pattern.CASE_INSENSITIVE);
     public static final Pattern VALID_FULL_NAME_REGEX =
-            Pattern.compile("[a-zA-Z\\s]+", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("[a-zA-Z0-9\\s]+", Pattern.CASE_INSENSITIVE);
 
     //role
     public static final String ROLE_GUEST = "GUEST";

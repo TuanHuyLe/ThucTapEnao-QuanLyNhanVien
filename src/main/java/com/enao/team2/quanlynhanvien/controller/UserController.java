@@ -2,12 +2,13 @@ package com.enao.team2.quanlynhanvien.controller;
 
 import com.enao.team2.quanlynhanvien.converter.UserConverter;
 import com.enao.team2.quanlynhanvien.dto.AddUserDTO;
-import com.enao.team2.quanlynhanvien.dto.PositionDTO;
 import com.enao.team2.quanlynhanvien.dto.UserDTO;
-import com.enao.team2.quanlynhanvien.messages.MessageResponse;
-import com.enao.team2.quanlynhanvien.model.PositionEntity;
+import com.enao.team2.quanlynhanvien.exception.BadRequestException;
+import com.enao.team2.quanlynhanvien.exception.ResourceNotFoundException;
+import com.enao.team2.quanlynhanvien.messages.ErrorMessage;
 import com.enao.team2.quanlynhanvien.model.UserEntity;
 import com.enao.team2.quanlynhanvien.service.IUserService;
+import com.enao.team2.quanlynhanvien.validatation.ValidateUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
@@ -73,41 +76,53 @@ public class UserController {
     }
 
     @PostMapping("/user")
-    public ResponseEntity<?> add(@RequestBody AddUserDTO addUserDTO){
+    public ResponseEntity<?> add(@RequestBody AddUserDTO addUserDTO, HttpServletResponse response) {
+        if (addUserDTO == null) {
+            throw new BadRequestException("Loi ");
+        }
         UserEntity entity;
-        MessageResponse responseMessage = new MessageResponse();
+        String[] error = ValidateUser.check(addUserDTO);
+        if (error.length > 0) {
+            ErrorMessage<String[]> errorMessage = new ErrorMessage<>(
+                    LocalDateTime.now(),
+                    HttpStatus.BAD_REQUEST.value(),
+                    error,
+                    ""
+            );
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType("application/json");
+            return ResponseEntity.badRequest().body(errorMessage);
+        }
         Optional<UserEntity> userEntity = userService.findByUsername(addUserDTO.getUsername());
-        if(userEntity.isPresent()){
-            return new ResponseEntity<>(HttpStatus.valueOf("duplicate user name"));
+        if (userEntity.isPresent()) {
+            throw new BadRequestException("Duplicate user name");
         }
         entity = this.userService.save(this.userConverter.toEntityWhenAdd(addUserDTO));
-        responseMessage.setMessage("Lưu thành công!");
-        return new ResponseEntity(userConverter.toDTO(entity), HttpStatus.OK);
+        return new ResponseEntity(userConverter.toDTO(entity), HttpStatus.CREATED);
     }
 
     @PutMapping("/user")
-    public ResponseEntity<?> updateUser(@RequestBody UserDTO userRequest){
-        Optional<UserEntity> dataMustBeUpdate = userService.findById(userRequest.getId());
-        if(dataMustBeUpdate.isPresent()){
-            UserEntity dataUpdate = dataMustBeUpdate.get();
-            if(dataUpdate.getUsername() == userRequest.getUsername()){
-                return new ResponseEntity<>(HttpStatus.valueOf("duplicate user name"));
-            }else {
-                return new ResponseEntity<>(userService.save(userConverter.toEntity(userRequest)), HttpStatus.OK);
+    public ResponseEntity<?> updateUser(@RequestBody UserDTO userRequest) {
+        UserEntity dataMustBeUpdate = userService.findById(userRequest.getId()).orElseThrow(
+                () -> new ResourceNotFoundException("Can not update user with id: " + userRequest.getId())
+        );
+        if (!dataMustBeUpdate.getUsername().equals(userRequest.getUsername())) {
+            Optional<UserEntity> user = userService.findByUsername(userRequest.getUsername());
+            if (user.isPresent() && user.get().getUsername().equals(userRequest.getUsername())) {
+                throw new BadRequestException("Username is exists!");
             }
-        }else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        return new ResponseEntity<>(userService.save(userConverter.toEntity(userRequest)), HttpStatus.OK);
     }
 
     @DeleteMapping("/user/{id}")
-    public ResponseEntity<?> delete(@PathVariable UUID id){
+    public ResponseEntity<?> delete(@PathVariable UUID id) {
         Optional<UserEntity> dataMustBeDelete = userService.findById(id);
-        if(dataMustBeDelete.isPresent()){
+        if (dataMustBeDelete.isPresent()) {
             UserEntity dataDelete = dataMustBeDelete.get();
-            return new ResponseEntity(userService.deleteSoftById(dataDelete), HttpStatus.OK);
-        }else{
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity(userConverter.toDTO(userService.deleteSoftById(dataDelete)), HttpStatus.OK);
+        } else {
+            throw new ResourceNotFoundException("Can not delete user with id: " + id);
         }
     }
 

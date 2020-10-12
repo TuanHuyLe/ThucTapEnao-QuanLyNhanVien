@@ -2,7 +2,6 @@ package com.enao.team2.quanlynhanvien.controller;
 
 import com.enao.team2.quanlynhanvien.converter.GroupConverter;
 import com.enao.team2.quanlynhanvien.dto.GroupDTO;
-import com.enao.team2.quanlynhanvien.exception.NoContentException;
 import com.enao.team2.quanlynhanvien.exception.ResourceNotFoundException;
 import com.enao.team2.quanlynhanvien.messages.MessageResponse;
 import com.enao.team2.quanlynhanvien.model.GroupEntity;
@@ -115,7 +114,7 @@ public class GroupController {
         }
         //response page
         if (groupsPage.isEmpty()) {
-            throw new NoContentException("No content");
+            return ResponseEntity.noContent().build();
         }
         List<GroupDTO> groupDTOS = new ArrayList<>();
         groupsPage.forEach(x -> groupDTOS.add(groupConverter.toDTO(x)));

@@ -76,6 +76,7 @@ public class UserServiceImpl implements IUserService {
         genericSpecification.add(new SearchCriteria(ESearchKey.group.name(), keyword, ESearchOperation.MATCH, ESearchKey.name.name()));
         genericSpecification.add(new SearchCriteria(ESearchKey.email.name(), keyword, ESearchOperation.MATCH, null));
         genericSpecification.add(new SearchCriteria(ESearchKey.username.name(), keyword, ESearchOperation.MATCH, null));
+        //tim kiem khong dau
         if (Constants.VALID_FULL_NAME_REGEX.matcher(keyword).matches()) {
             String slugKeyword = slugUtils.slug(keyword);
             genericSpecification.add(new SearchCriteria(ESearchKey.slug.name(), slugKeyword, ESearchOperation.MATCH, null));
