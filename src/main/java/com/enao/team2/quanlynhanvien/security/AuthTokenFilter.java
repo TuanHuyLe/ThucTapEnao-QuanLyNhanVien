@@ -1,11 +1,13 @@
 package com.enao.team2.quanlynhanvien.security;
 
+import com.enao.team2.quanlynhanvien.constants.RedisKey;
 import com.enao.team2.quanlynhanvien.exception.UnauthorizedException;
 import com.enao.team2.quanlynhanvien.service.impl.UserDetailsServiceImpl;
 import com.enao.team2.quanlynhanvien.utils.JwtUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -34,6 +36,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     private JwtUtils jwtUtils;
 
     @Autowired
+    private RedisTemplate template;
+
+    @Autowired
     UserDetailsServiceImpl userDetailsService;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
@@ -44,13 +49,15 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             //get jwt from request
             String jwt = getJwtFromRequest(request);
             UserDetails userDetails;
-            if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-
-                //get username from jwt
-                String username = jwtUtils.getUsernameFromJwtToken(jwt);
-                //load user detail
-                userDetails = userDetailsService.loadUserByUsername(username);
-
+            if (jwt != null && jwtUtils.validateJwtToken(jwt) && template.opsForValue().get(RedisKey.JWT).equals(jwt)) {
+                if (template.hasKey(RedisKey.USER_DETAIL) && template.opsForValue().get(RedisKey.USER_DETAIL) != null) {
+                    userDetails = (UserDetails) template.opsForValue().get(RedisKey.USER_DETAIL);
+                } else {
+                    //get username from jwt
+                    String username = jwtUtils.getUsernameFromJwtToken(jwt);
+                    //load user detail
+                    userDetails = userDetailsService.loadUserByUsername(username);
+                }
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

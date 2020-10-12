@@ -1,10 +1,14 @@
 package com.enao.team2.quanlynhanvien.controller;
 
+import com.enao.team2.quanlynhanvien.constants.RedisKey;
 import com.enao.team2.quanlynhanvien.exception.UnauthorizedException;
 import com.enao.team2.quanlynhanvien.messages.JwtResponse;
 import com.enao.team2.quanlynhanvien.dto.LoginDTO;
+import com.enao.team2.quanlynhanvien.messages.MessageResponse;
 import com.enao.team2.quanlynhanvien.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -12,7 +16,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -23,6 +26,9 @@ public class AuthController {
 
     @Autowired
     JwtUtils jwtUtils;
+
+    @Autowired
+    private RedisTemplate template;
 
     /**
      * function login
@@ -44,6 +50,8 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         //generate jwt
         jwt = jwtUtils.generateJwtToken(authentication);
+        //add jwt to redis
+        template.opsForValue().set(RedisKey.JWT, jwt);
         return ResponseEntity.ok(new JwtResponse(jwt));
     }
 
@@ -55,6 +63,8 @@ public class AuthController {
     @PostMapping("/logout")
     public String logout() {
         SecurityContextHolder.clearContext();
+        template.delete(RedisKey.JWT);
+        template.delete(RedisKey.USER_DETAIL);
         return "logout success";
     }
 
