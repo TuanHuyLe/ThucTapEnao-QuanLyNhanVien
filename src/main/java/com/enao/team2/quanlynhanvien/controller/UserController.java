@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +38,7 @@ public class UserController {
     @Autowired
     UserConverter userConverter;
 
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_USER\")")
     @GetMapping("/user/{id}")
     public ResponseEntity<?> getOne(@PathVariable UUID id) {
         UserEntity userEntity = userService.findById(id).orElseThrow(
@@ -45,6 +47,7 @@ public class UserController {
         return new ResponseEntity(dto, HttpStatus.OK);
     }
 
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_USER\")")
     @GetMapping("/user")
     public ResponseEntity<?> home(
             @RequestParam(value = "keyword", required = false) String keyword,
@@ -88,6 +91,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"ADD_USER\")")
     @PostMapping("/user")
     public ResponseEntity<?> add(@RequestBody AddUserDTO addUserDTO, HttpServletResponse response) {
         UserEntity entity;
@@ -125,9 +129,11 @@ public class UserController {
             entity = this.userService.save(newUser);
         }
         responseMessage.setMessage("Save successfully!");
-        return new ResponseEntity(userConverter.toDTO(entity), HttpStatus.OK);
+
+        return new ResponseEntity(userConverter.toDTO(entity), HttpStatus.CREATED);
     }
 
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"EDIT_USER\")")
     @PutMapping("/user")
     public ResponseEntity<?> updateUser(@RequestBody UserDTO userRequest) {
         UserEntity dataMustBeUpdate = userService.findById(userRequest.getId()).orElseThrow(
@@ -140,12 +146,21 @@ public class UserController {
             }
         }
         UserEntity userEntity = userConverter.toEntity(userRequest);
-        userEntity.setPassword(dataMustBeUpdate.getPassword());
-        userEntity.setGroup(dataMustBeUpdate.getGroup());
-        userEntity.setPositions(dataMustBeUpdate.getPositions());
+
+        UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<String> rolesName = user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
+        boolean isAdmin = rolesName.contains("ROLE_FULL");
+        if (isAdmin) {
+            userEntity.setPassword(dataMustBeUpdate.getPassword());
+        }else{
+            userEntity.setPassword(dataMustBeUpdate.getPassword());
+            userEntity.setGroup(dataMustBeUpdate.getGroup());
+            userEntity.setPositions(dataMustBeUpdate.getPositions());
+        }
         return new ResponseEntity<>(userConverter.toDTO(userService.save(userEntity)), HttpStatus.OK);
     }
 
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"REMOVE_USER\")")
     @DeleteMapping("/user/{id}")
     public ResponseEntity<?> delete(@PathVariable UUID id) {
         Optional<UserEntity> dataMustBeDelete = userService.findById(id);
