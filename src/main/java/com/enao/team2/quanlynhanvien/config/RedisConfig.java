@@ -6,21 +6,31 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.session.data.redis.config.ConfigureRedisAction;
 
 @Configuration
 public class RedisConfig {
-    @Value("${redis.host}")
+    @Value("${spring.redis.host}")
     private String redisHost;
 
-    @Value("${redis.port}")
+    @Value("${spring.redis.port}")
     private int redisPort;
 
+    @Value("${spring.redis.password}")
+    private String redisPassword;
+
     @Bean
-    public LettuceConnectionFactory redisConnectionFactory() {
-        // Tạo Standalone Connection tới Redis
-        return new LettuceConnectionFactory(new RedisStandaloneConfiguration(redisHost, redisPort));
+    ConfigureRedisAction configureRedisAction() {
+        return ConfigureRedisAction.NO_OP;
+    }
+
+    @Bean
+    public JedisConnectionFactory redisConnectionFactory() {
+        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(redisHost, redisPort);
+        config.setPassword(redisPassword);
+        return new JedisConnectionFactory(config);
     }
 
     @Bean

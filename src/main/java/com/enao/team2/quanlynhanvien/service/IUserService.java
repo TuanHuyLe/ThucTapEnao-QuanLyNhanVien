@@ -11,12 +11,14 @@ import java.util.UUID;
 public interface IUserService {
     /**
      * get all user trong DB
+     *
      * @return list user entity
      */
     List<UserEntity> findAll();
 
     /**
      * get tat ca user su dung phan trang
+     *
      * @param pageable phan trang
      * @return page user entity
      */
@@ -24,6 +26,7 @@ public interface IUserService {
 
     /**
      * luu hoac cap nhat thay doi user
+     *
      * @param userEntity doi tuong duoc luu hoac cap nhat
      * @return doi tuong vua duoc luu hoac cap nhat
      */
@@ -31,8 +34,9 @@ public interface IUserService {
 
     /**
      * tim kiem co type
-     * @param keyword gia tri can tim
-     * @param type loai gia tri can tim
+     *
+     * @param keyword  gia tri can tim
+     * @param type     loai gia tri can tim
      * @param pageable phan trang
      * @return page user entity
      */
@@ -40,7 +44,8 @@ public interface IUserService {
 
     /**
      * tim kiem khong co type - tim kiem tat ca
-     * @param keyword gia tri can tim
+     *
+     * @param keyword  gia tri can tim
      * @param pageable loai gia tri can tim
      * @return page user entity
      */
@@ -48,6 +53,7 @@ public interface IUserService {
 
     /**
      * tim kiem user theo username
+     *
      * @param username chuoi username can tim
      * @return doi tuong user kieu optional
      */
