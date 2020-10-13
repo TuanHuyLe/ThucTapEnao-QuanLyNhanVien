@@ -68,12 +68,12 @@ public class UserConverter {
         if(groupEntity.isPresent()){
             userEntity.setGroup(groupEntity.get());
         }
+        Set<RoleEntity> roleEntities = new HashSet<>();
         for(String roleName : userDTO.getRoleName()){
             RoleEntity roleEntity = roleService.findByName(roleName).get();
-            Set<RoleEntity> roleEntities = new HashSet<>();
             roleEntities.add(roleEntity);
-            userEntity.setRoles(roleEntities);
         }
+        userEntity.setRoles(roleEntities);
         return userEntity;
     }
 
