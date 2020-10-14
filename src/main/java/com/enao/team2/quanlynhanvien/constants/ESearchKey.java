@@ -10,4 +10,6 @@ public enum ESearchKey {
     group,
     gender,
     description,
+    slugname,
+    slugdescription,
 }

@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 public class GroupDTO extends AbstractDTO {
     private String name;
     private String description;
-    private String slug;
+    private String slugName;
+    private String slugDescription;
 }

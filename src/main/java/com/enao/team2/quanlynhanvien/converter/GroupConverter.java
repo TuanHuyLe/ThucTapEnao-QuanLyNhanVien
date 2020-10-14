@@ -24,7 +24,8 @@ public class GroupConverter {
         }
         groupEntity.setDescription(groupDTO.getDescription());
         groupEntity.setName(groupDTO.getName());
-        groupEntity.setSlug(slugUtils.slug(groupDTO.getName() + "-" + groupDTO.getDescription()));
+        groupEntity.setSlugname(slugUtils.slug(groupDTO.getName()));
+        groupEntity.setSlugdescription(slugUtils.slug(groupDTO.getDescription()));
         if (groupDTO.getActive() != null) {
             groupEntity.setActive(groupDTO.getActive());
         } else {
@@ -39,7 +40,8 @@ public class GroupConverter {
         groupDTO.setDescription(groupEntity.getDescription());
         groupDTO.setName(groupEntity.getName());
         groupDTO.setActive(groupEntity.getActive());
-        groupDTO.setSlug(groupEntity.getSlug());
+        groupDTO.setSlugName(groupEntity.getSlugname());
+        groupDTO.setSlugDescription(groupEntity.getSlugdescription());
         return groupDTO;
     }
 
