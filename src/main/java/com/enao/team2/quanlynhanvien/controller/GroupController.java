@@ -31,13 +31,13 @@ public class GroupController {
 
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
     @GetMapping("/group/{id}")
+
     public ResponseEntity<GroupDTO> getOne(@PathVariable UUID id) {
         GroupEntity groupEntity = groupService.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Not found group with id: " + id.toString()));
         GroupDTO dto = groupConverter.toDTO(groupEntity);
         return new ResponseEntity(dto, HttpStatus.OK);
     }
-
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"ADD_GROUP\")")
     @PostMapping("/group")
     public ResponseEntity<?> save(@RequestBody GroupDTO dto) {
@@ -49,34 +49,37 @@ public class GroupController {
             return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
         }
         entity = this.groupService.save(this.groupConverter.toEntity(dto));
-        responseMessage.setMessage("Lưu thành công!");
         return new ResponseEntity(groupConverter.toDTO(entity), HttpStatus.CREATED);
     }
 
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"EDIT_GROUP\")")
     @PutMapping("/group")
     public ResponseEntity<?> update(@RequestBody GroupDTO dto) {
-        //get old group from db
-        GroupEntity oldGroup = this.groupService.findById(dto.getId()).orElseThrow(
-                () -> new ResourceNotFoundException("Can not update group with id: " + dto.getId())
-        );
+        Optional<GroupEntity> old = this.groupService.findById(dto.getId());
         MessageResponse responseMessage = new MessageResponse();
-
+        if (!old.isPresent()) {
+            throw new ResourceNotFoundException("Not found group with id: " + dto.getId().toString());
+        }
+        GroupEntity oldEntity = old.get();
         Optional<GroupEntity> name = this.groupService.findByName(dto.getName());
-        if (name.isPresent() && !dto.getName().equals(oldGroup.getName())) {
+        if (name.isPresent() && !dto.getName().equals(oldEntity.getName())) {
             responseMessage.setMessage("Trùng tên!");
             return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
         }
-        oldGroup = this.groupService.save(groupConverter.toEntity(dto));
-        responseMessage.setMessage("Sửa thành công");
-        return new ResponseEntity(groupConverter.toDTO(oldGroup), HttpStatus.OK);
+        oldEntity = this.groupService.save(groupConverter.toEntity(dto));
+        return new ResponseEntity(groupConverter.toDTO(oldEntity), HttpStatus.CREATED);
     }
 
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"REMOVE_GROUP\")")
     @DeleteMapping("/group/{id}")
-    public ResponseEntity<MessageResponse> delete(@PathVariable(value = "id") UUID id) {
-        MessageResponse responseMessage = this.groupService.delete(id);
-        return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
+    public ResponseEntity<?> delete(@PathVariable(value = "id") UUID id) {
+        if (!groupService.checkId(id)){
+            throw new ResourceNotFoundException("Not found group with id: " + id.toString());
+        }
+        GroupEntity groupEntity = groupService.findById(id).get();
+        groupEntity.setActive(false);
+        groupService.save(groupEntity);
+        return new ResponseEntity(groupConverter.toDTO(groupEntity), HttpStatus.OK);
     }
 
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
@@ -101,22 +104,25 @@ public class GroupController {
         }
         Page<GroupEntity> groupsPage;
         //search
-        if (keyword != null) {
+        if (keyword != null && type != null) {
+            String[] types = type.split("-");
+            groupsPage = groupService.findGroupsWithPredicate(keyword, types, pageable);
+        } else if (keyword != null) {
             groupsPage = groupService.findGroupsWithPredicate(keyword, pageable);
-        } else {
+        } else {                  
             groupsPage = groupService.findAll(pageable);
         }
         //response page
-        List<GroupDTO> groupDTOs = new ArrayList<>();
-        groupsPage.forEach(x -> groupDTOs.add(groupConverter.toDTO(x)));
-        if (groupDTOs.isEmpty()) {
+        if (groupsPage.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
+        List<GroupDTO> groupDTOS = new ArrayList<>();
+        groupsPage.forEach(x -> groupDTOS.add(groupConverter.toDTO(x)));
         Map<String, Object> response = new HashMap<>();
         response.put("totalPages", groupsPage.getTotalPages());
         response.put("totalItems", groupsPage.getTotalElements());
         response.put("currentPage", groupsPage.getNumber() + 1);
-        response.put("groups", groupDTOs);
+        response.put("groups", groupDTOS);
         return ResponseEntity.ok(response);
     }
 }
