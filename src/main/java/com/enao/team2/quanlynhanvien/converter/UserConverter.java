@@ -68,6 +68,12 @@ public class UserConverter {
         if(groupEntity.isPresent()){
             userEntity.setGroup(groupEntity.get());
         }
+        Set<RoleEntity> roleEntities = new HashSet<>();
+        for(String roleName : userDTO.getRoleName()){
+            RoleEntity roleEntity = roleService.findByName(roleName).get();
+            roleEntities.add(roleEntity);
+        }
+        userEntity.setRoles(roleEntities);
         return userEntity;
     }
 
@@ -98,10 +104,22 @@ public class UserConverter {
         if(groupEntity.isPresent()) {
             userEntity.setGroup(groupEntity.get());
         }
+        Set<RoleEntity> roleEntities = new HashSet<>();
+        for(String roleName : userDTO.getRoleName()){
+            RoleEntity roleEntity = roleService.findByName(roleName).get();
+            roleEntities.add(roleEntity);
+        }
+        userEntity.setRoles(roleEntities);
         return userEntity;
     }
 
     public UserDTO toDTO(UserEntity userEntity) {
+        Set<RoleEntity> userEntityRoles= userEntity.getRoles();
+        List<RoleEntity> list = new ArrayList<>(userEntityRoles);
+        List<String> roleName = new ArrayList<>();
+        for (RoleEntity roleEntity : list){
+            roleName.add(roleEntity.getName());
+        }
         UserDTO userDTO = new UserDTO();
         userDTO.setId(userEntity.getId());
         userDTO.setUsername(userEntity.getUsername());
@@ -116,6 +134,7 @@ public class UserConverter {
         if (userEntity.getPositions() != null) {
             userDTO.setPositionName(userEntity.getPositions().getName());
         }
+        userDTO.setRoleName(roleName);
         return userDTO;
     }
 }
