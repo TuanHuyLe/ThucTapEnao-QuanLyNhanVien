@@ -2,7 +2,6 @@ package com.enao.team2.quanlynhanvien.dto;
 
 import lombok.*;
 
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter

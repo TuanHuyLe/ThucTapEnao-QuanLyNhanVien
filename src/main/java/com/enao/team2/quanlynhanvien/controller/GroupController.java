@@ -5,15 +5,13 @@ import com.enao.team2.quanlynhanvien.converter.UserConverter;
 import com.enao.team2.quanlynhanvien.dto.GroupDTO;
 import com.enao.team2.quanlynhanvien.dto.UserDTO;
 import com.enao.team2.quanlynhanvien.exception.ResourceNotFoundException;
-import com.enao.team2.quanlynhanvien.messages.ErrorMessage;
+import com.enao.team2.quanlynhanvien.messages.ApiError;
 import com.enao.team2.quanlynhanvien.messages.MessageResponse;
 import com.enao.team2.quanlynhanvien.model.GroupEntity;
 import com.enao.team2.quanlynhanvien.model.UserEntity;
-import com.enao.team2.quanlynhanvien.repository.IUserRepository;
 import com.enao.team2.quanlynhanvien.service.IGroupService;
 import com.enao.team2.quanlynhanvien.service.IUserService;
 import com.enao.team2.quanlynhanvien.validatation.ValidateGroup;
-import com.enao.team2.quanlynhanvien.validatation.ValidateUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -54,6 +52,7 @@ public class GroupController {
         GroupDTO dto = groupConverter.toDTO(groupEntity);
         return new ResponseEntity(dto, HttpStatus.OK);
     }
+
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"ADD_GROUP\")")
     @PostMapping("/group")
     public ResponseEntity<?> save(@RequestBody GroupDTO dto, HttpServletResponse response) {
@@ -61,11 +60,11 @@ public class GroupController {
         MessageResponse responseMessage = new MessageResponse();
         List<String> error = ValidateGroup.check(dto);
         if (!error.isEmpty()) {
-            ErrorMessage<List<String>> errorMessage = new ErrorMessage<>(
+            ApiError errorMessage = new ApiError(
                     LocalDateTime.now(),
                     HttpStatus.BAD_REQUEST.value(),
-                    error,
-                    ""
+                    "Add group failed!",
+                    error
             );
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.setContentType("application/json");
@@ -85,11 +84,11 @@ public class GroupController {
     public ResponseEntity<?> update(@RequestBody GroupDTO dto, HttpServletResponse response) {
         List<String> error = ValidateGroup.check(dto);
         if (!error.isEmpty()) {
-            ErrorMessage<List<String>> errorMessage = new ErrorMessage<>(
+            ApiError errorMessage = new ApiError(
                     LocalDateTime.now(),
                     HttpStatus.BAD_REQUEST.value(),
-                    error,
-                    ""
+                    "Update group failed!",
+                    error
             );
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.setContentType("application/json");
@@ -113,7 +112,7 @@ public class GroupController {
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"REMOVE_GROUP\")")
     @DeleteMapping("/group/{id}")
     public ResponseEntity<?> delete(@PathVariable(value = "id") UUID id) {
-        if (!groupService.checkId(id)){
+        if (!groupService.checkId(id)) {
             throw new ResourceNotFoundException("Not found group with id: " + id.toString());
         }
         GroupEntity groupEntity = groupService.findById(id).get();
@@ -149,7 +148,7 @@ public class GroupController {
             groupsPage = groupService.findGroupsWithPredicate(keyword, types, pageable);
         } else if (keyword != null) {
             groupsPage = groupService.findGroupsWithPredicate(keyword, pageable);
-        } else {                  
+        } else {
             groupsPage = groupService.findAll(pageable);
         }
         //response page

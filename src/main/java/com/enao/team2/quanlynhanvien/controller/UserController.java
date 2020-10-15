@@ -3,17 +3,18 @@ package com.enao.team2.quanlynhanvien.controller;
 import com.enao.team2.quanlynhanvien.converter.UserConverter;
 import com.enao.team2.quanlynhanvien.dto.AddUserDTO;
 import com.enao.team2.quanlynhanvien.dto.ChangePasswordDTO;
+import com.enao.team2.quanlynhanvien.dto.EmailDTO;
 import com.enao.team2.quanlynhanvien.dto.UserDTO;
 import com.enao.team2.quanlynhanvien.exception.BadRequestException;
 import com.enao.team2.quanlynhanvien.exception.ResourceNotFoundException;
-import com.enao.team2.quanlynhanvien.messages.ErrorMessage;
+import com.enao.team2.quanlynhanvien.messages.ApiError;
 import com.enao.team2.quanlynhanvien.messages.MessageResponse;
 import com.enao.team2.quanlynhanvien.model.UserEntity;
 import com.enao.team2.quanlynhanvien.service.IUserService;
 import com.enao.team2.quanlynhanvien.service.impl.UserDetailsImpl;
+import com.enao.team2.quanlynhanvien.service.mail.EmailService;
 import com.enao.team2.quanlynhanvien.validatation.ValidateUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,13 +24,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCrypt;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -45,6 +44,9 @@ public class UserController {
 
     @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Autowired
+    EmailService emailService;
 
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_USER\")")
     @GetMapping("/user/{id}")
@@ -101,19 +103,17 @@ public class UserController {
 
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"ADD_USER\")")
     @PostMapping("/user")
-    public ResponseEntity<?> add(@RequestBody AddUserDTO addUserDTO, HttpServletResponse response) {
+    public ResponseEntity<?> add(@RequestBody AddUserDTO addUserDTO) {
         UserEntity entity;
         MessageResponse responseMessage = new MessageResponse();
         List<String> error = ValidateUser.check(addUserDTO);
         if (!error.isEmpty()) {
-            ErrorMessage<List<String>> errorMessage = new ErrorMessage<>(
+            ApiError errorMessage = new ApiError(
                     LocalDateTime.now(),
                     HttpStatus.BAD_REQUEST.value(),
-                    error,
-                    ""
+                    "Add user failed!",
+                    error
             );
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.setContentType("application/json");
             return ResponseEntity.badRequest().body(errorMessage);
         }
         Optional<UserEntity> userEntity = userService.findByUsername(addUserDTO.getUsername());
@@ -142,25 +142,32 @@ public class UserController {
     }
 
     @PutMapping("/user/changePassword")
-    public ResponseEntity<?> changPassword(@RequestBody ChangePasswordDTO changePasswordDTO){
-        UserEntity userEntity;
+    public ResponseEntity<?> changPassword(@RequestBody ChangePasswordDTO newPassword) {
         MessageResponse responseMessage = new MessageResponse();
-        UserEntity dataChangePassword = userService.findByUsername(changePasswordDTO.getUserName()).orElseThrow(
-                () -> new ResourceNotFoundException("can not find user with username: "+changePasswordDTO.getUserName())
+        UserEntity dataChangePassword = userService.findByUsername(newPassword.getUserName()).orElseThrow(
+                () -> new ResourceNotFoundException("can not find user with username: " + newPassword.getUserName())
         );
-        if(!changePasswordDTO.getOldPassword().equals(passwordEncoder.encode(dataChangePassword.getPassword()))){
-            throw new BadRequestException("Old password is incorrect !");
-        }else{
-            if(changePasswordDTO.getNewPassword().isEmpty()){
-                throw new BadRequestException("New password is required !");
-            }else if (changePasswordDTO.getNewPassword().equals(changePasswordDTO.getOldPassword())){
+        if (!passwordEncoder.matches(newPassword.getOldPassword(), dataChangePassword.getPassword())) {
+            throw new BadRequestException("Old password is incorrect!");
+        } else {
+            if (newPassword.getNewPassword().isEmpty()) {
+                throw new BadRequestException("New password is required!");
+            } else if (newPassword.getNewPassword().equals(newPassword.getOldPassword())) {
                 throw new BadRequestException("New password must be unequal with old password");
-            }else{
-                userEntity = userService.save(userConverter.toEntityWhenChangePass(dataChangePassword, changePasswordDTO));
-                responseMessage.setMessage("Save successfully!");
+            } else {
+                userService.save(userConverter.toEntityWhenChangePass(dataChangePassword, newPassword));
+                responseMessage.setMessage("Change password is successfully!");
+                EmailDTO emailDTO = new EmailDTO();
+                emailDTO.setSubject("Change password");
+                emailDTO.setRecipients(newPassword.getEmail());
+                String sb = "Password has changed by <b>" + dataChangePassword.getUsername() +
+                        "</b><br>New password is: <b>" + newPassword.getNewPassword() +
+                        "</b><br>Time: " + LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME);
+                emailDTO.setContent(sb);
+                emailService.sendMessage(emailDTO);
             }
         }
-        return new ResponseEntity<>(userConverter.toDTO(userEntity), HttpStatus.OK);
+        return new ResponseEntity<>(responseMessage, HttpStatus.OK);
     }
 
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"EDIT_USER\")")
@@ -182,7 +189,7 @@ public class UserController {
         boolean isAdmin = rolesName.contains("ROLE_FULL");
         if (isAdmin) {
             userEntity.setPassword(dataMustBeUpdate.getPassword());
-        }else{
+        } else {
             userEntity.setPassword(dataMustBeUpdate.getPassword());
             userEntity.setGroup(dataMustBeUpdate.getGroup());
             userEntity.setPositions(dataMustBeUpdate.getPositions());

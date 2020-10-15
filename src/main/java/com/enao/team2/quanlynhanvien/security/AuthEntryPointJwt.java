@@ -1,6 +1,6 @@
 package com.enao.team2.quanlynhanvien.security;
 
-import com.enao.team2.quanlynhanvien.messages.ErrorMessage;
+import com.enao.team2.quanlynhanvien.messages.ApiError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.AuthenticationException;
@@ -30,11 +30,11 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
         logger.error("Unauthorized error: {}", authException.getMessage());
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        ErrorMessage<String> errorMessage = new ErrorMessage<>(
+        ApiError errorMessage = new ApiError(
                 LocalDateTime.now(),
                 HttpServletResponse.SC_UNAUTHORIZED,
-                authException.getMessage(),
-                "Unauthorized"
+                "Unauthorized",
+                authException.getMessage()
         );
         response.getOutputStream().print(errorMessage.toString());
     }
