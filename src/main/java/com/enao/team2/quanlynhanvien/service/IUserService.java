@@ -42,6 +42,8 @@ public interface IUserService {
      */
     Page<UserEntity> findUsersWithPredicate(String keyword, String[] type, Pageable pageable);
 
+    Page<UserEntity> findUsersWithPredicate(String keyword, String[] type, Pageable pageable, String groupName);
+
     /**
      * tim kiem khong co type - tim kiem tat ca
      *
@@ -50,6 +52,8 @@ public interface IUserService {
      * @return page user entity
      */
     Page<UserEntity> findUsersWithPredicate(String keyword, Pageable pageable);
+
+    Page<UserEntity> findUsersWithPredicate(String keyword, Pageable pageable, String groupName);
 
     /**
      * tim kiem user theo username
@@ -62,4 +66,6 @@ public interface IUserService {
     Optional<UserEntity> findById(UUID id);
 
     UserEntity deleteSoftById(UserEntity dataDelete);
+
+    Page<UserEntity> findByGroupName(String name, Pageable pageable);
 }

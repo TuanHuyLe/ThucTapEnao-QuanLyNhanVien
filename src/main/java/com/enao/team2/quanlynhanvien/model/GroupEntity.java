@@ -23,7 +23,10 @@ public class GroupEntity extends AuditableEntity<UUID> {
     private String description;
 
     @Column
-    private String slug;
+    private String slugname;
+
+    @Column
+    private String slugdescription;
 
     //one to many user
     @OneToMany(

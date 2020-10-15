@@ -105,23 +105,15 @@ public class RoleController {
     @DeleteMapping("/role/{id}")
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"REMOVE_ROLE\")")
     public ResponseEntity<MessageResponse> delete(@PathVariable(value = "id") UUID id){
-        MessageResponse responseMessage = new MessageResponse();
-        RoleEntity roleEntity = roleService.findById(id).get();
-        if (!roleService.checkId(id)){
-            return new ResponseEntity(new MessageResponse("Không tìm thấy bản ghi!"), HttpStatus.OK);
-        }
-        else
-        roleEntity.setActive(false);
-        roleService.save(roleEntity);
-        responseMessage.setMessage("Xóa thành công!");
-        return new ResponseEntity(responseMessage.getMessage(), HttpStatus.OK);
+        MessageResponse messageResponse = this.roleService.delete(id);
+        return new ResponseEntity(messageResponse.getMessage(), HttpStatus.OK);
     }
 
     @GetMapping("/roles")
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_ROLE\")")
     public ResponseEntity<?> search(
             @RequestParam(value = "keyword", required = false) String keyword,
-            @RequestParam(value = "type", required = false, defaultValue = "all") String type,
+            @RequestParam(value = "type", required = false) String type,
             @RequestParam(value = "page", required = false, defaultValue = "1") String page,
             @RequestParam(value = "limit", required = false, defaultValue = "5") String limit,
             @RequestParam(value = "sb", required = false, defaultValue = "") String sortBy,
@@ -139,8 +131,11 @@ public class RoleController {
         }
         Page<RoleEntity> rolesPage;
         //search
-        if (keyword != null) {
-            rolesPage = roleService.findGroupsWithPredicate(keyword, type, pageable);
+        if (keyword != null && type != null) {
+            String[] types = type.split("-");
+            rolesPage = roleService.findRolesWithPredicate(keyword, types, pageable);
+        } else if (keyword != null) {
+            rolesPage = roleService.findRolesWithPredicate(keyword, pageable);
         } else {
             rolesPage = roleService.findAll(pageable);
         }

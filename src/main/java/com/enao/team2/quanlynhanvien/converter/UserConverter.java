@@ -1,6 +1,7 @@
 package com.enao.team2.quanlynhanvien.converter;
 
 import com.enao.team2.quanlynhanvien.dto.AddUserDTO;
+import com.enao.team2.quanlynhanvien.dto.ChangePasswordDTO;
 import com.enao.team2.quanlynhanvien.dto.UserDTO;
 import com.enao.team2.quanlynhanvien.model.GroupEntity;
 import com.enao.team2.quanlynhanvien.model.PositionEntity;
@@ -68,6 +69,12 @@ public class UserConverter {
         if(groupEntity.isPresent()){
             userEntity.setGroup(groupEntity.get());
         }
+        Set<RoleEntity> roleEntities = new HashSet<>();
+        for(String roleName : userDTO.getRoleName()){
+            RoleEntity roleEntity = roleService.findByName(roleName).get();
+            roleEntities.add(roleEntity);
+        }
+        userEntity.setRoles(roleEntities);
         return userEntity;
     }
 
@@ -98,10 +105,22 @@ public class UserConverter {
         if(groupEntity.isPresent()) {
             userEntity.setGroup(groupEntity.get());
         }
+        Set<RoleEntity> roleEntities = new HashSet<>();
+        for(String roleName : userDTO.getRoleName()){
+            RoleEntity roleEntity = roleService.findByName(roleName).get();
+            roleEntities.add(roleEntity);
+        }
+        userEntity.setRoles(roleEntities);
         return userEntity;
     }
 
     public UserDTO toDTO(UserEntity userEntity) {
+        Set<RoleEntity> userEntityRoles= userEntity.getRoles();
+        List<RoleEntity> list = new ArrayList<>(userEntityRoles);
+        List<String> roleName = new ArrayList<>();
+        for (RoleEntity roleEntity : list){
+            roleName.add(roleEntity.getName());
+        }
         UserDTO userDTO = new UserDTO();
         userDTO.setId(userEntity.getId());
         userDTO.setUsername(userEntity.getUsername());
@@ -116,6 +135,13 @@ public class UserConverter {
         if (userEntity.getPositions() != null) {
             userDTO.setPositionName(userEntity.getPositions().getName());
         }
+        userDTO.setRoleName(roleName);
         return userDTO;
+    }
+
+
+    public UserEntity toEntityWhenChangePass(UserEntity dataChangePassword, ChangePasswordDTO changePasswordDTO) {
+        dataChangePassword.setPassword(BCrypt.hashpw(changePasswordDTO.getNewPassword(), BCrypt.gensalt(12)));
+        return dataChangePassword;
     }
 }

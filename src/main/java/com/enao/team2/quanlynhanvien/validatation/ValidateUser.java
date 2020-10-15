@@ -33,6 +33,9 @@ public class ValidateUser {
         if (userDTO.getPositionName() == null) {
             error.add("Position is required!");
         }
+        if(userDTO.getRoleName().size() ==0){
+            error.add("Role name is required!");
+        }
         return error;
     }
 }
