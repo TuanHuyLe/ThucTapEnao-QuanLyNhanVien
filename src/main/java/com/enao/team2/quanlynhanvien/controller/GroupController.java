@@ -1,11 +1,19 @@
 package com.enao.team2.quanlynhanvien.controller;
 
 import com.enao.team2.quanlynhanvien.converter.GroupConverter;
+import com.enao.team2.quanlynhanvien.converter.UserConverter;
 import com.enao.team2.quanlynhanvien.dto.GroupDTO;
+import com.enao.team2.quanlynhanvien.dto.UserDTO;
 import com.enao.team2.quanlynhanvien.exception.ResourceNotFoundException;
+import com.enao.team2.quanlynhanvien.messages.ErrorMessage;
 import com.enao.team2.quanlynhanvien.messages.MessageResponse;
 import com.enao.team2.quanlynhanvien.model.GroupEntity;
+import com.enao.team2.quanlynhanvien.model.UserEntity;
+import com.enao.team2.quanlynhanvien.repository.IUserRepository;
 import com.enao.team2.quanlynhanvien.service.IGroupService;
+import com.enao.team2.quanlynhanvien.service.IUserService;
+import com.enao.team2.quanlynhanvien.validatation.ValidateGroup;
+import com.enao.team2.quanlynhanvien.validatation.ValidateUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +24,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
@@ -29,6 +39,12 @@ public class GroupController {
     @Autowired
     GroupConverter groupConverter;
 
+    @Autowired
+    IUserService userService;
+
+    @Autowired
+    UserConverter userConverter;
+
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
     @GetMapping("/group/{id}")
 
@@ -40,9 +56,21 @@ public class GroupController {
     }
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"ADD_GROUP\")")
     @PostMapping("/group")
-    public ResponseEntity<?> save(@RequestBody GroupDTO dto) {
+    public ResponseEntity<?> save(@RequestBody GroupDTO dto, HttpServletResponse response) {
         GroupEntity entity;
         MessageResponse responseMessage = new MessageResponse();
+        List<String> error = ValidateGroup.check(dto);
+        if (!error.isEmpty()) {
+            ErrorMessage<List<String>> errorMessage = new ErrorMessage<>(
+                    LocalDateTime.now(),
+                    HttpStatus.BAD_REQUEST.value(),
+                    error,
+                    ""
+            );
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType("application/json");
+            return ResponseEntity.badRequest().body(errorMessage);
+        }
         Optional<GroupEntity> name = groupService.findByName(dto.getName());
         if (name.isPresent()) {
             responseMessage.setMessage("Trùng tên!");
@@ -54,7 +82,19 @@ public class GroupController {
 
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"EDIT_GROUP\")")
     @PutMapping("/group")
-    public ResponseEntity<?> update(@RequestBody GroupDTO dto) {
+    public ResponseEntity<?> update(@RequestBody GroupDTO dto, HttpServletResponse response) {
+        List<String> error = ValidateGroup.check(dto);
+        if (!error.isEmpty()) {
+            ErrorMessage<List<String>> errorMessage = new ErrorMessage<>(
+                    LocalDateTime.now(),
+                    HttpStatus.BAD_REQUEST.value(),
+                    error,
+                    ""
+            );
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType("application/json");
+            return ResponseEntity.badRequest().body(errorMessage);
+        }
         Optional<GroupEntity> old = this.groupService.findById(dto.getId());
         MessageResponse responseMessage = new MessageResponse();
         if (!old.isPresent()) {
@@ -84,7 +124,7 @@ public class GroupController {
 
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
     @GetMapping("/group")
-    public ResponseEntity<?> search(
+    public ResponseEntity<?> listAll(
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "type", required = false) String type,
             @RequestParam(value = "page", required = false, defaultValue = "1") String page,
@@ -123,6 +163,50 @@ public class GroupController {
         response.put("totalItems", groupsPage.getTotalElements());
         response.put("currentPage", groupsPage.getNumber() + 1);
         response.put("groups", groupDTOS);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/group/{name}/user")
+    public ResponseEntity<?> listByGroupId(
+            @PathVariable(value = "name") String name,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "type", required = false) String type,
+            @RequestParam(value = "page", required = false, defaultValue = "1") String page,
+            @RequestParam(value = "limit", required = false, defaultValue = "5") String limit,
+            @RequestParam(value = "sb", required = false, defaultValue = "") String sortBy,
+            @RequestParam(value = "asc", required = false, defaultValue = "true") String asc) {
+        Pageable pageable;
+        //sort
+        if (!sortBy.isEmpty()) {
+            if (Boolean.parseBoolean(asc)) {
+                pageable = PageRequest.of(Integer.parseInt(page) - 1, Integer.parseInt(limit), Sort.by(sortBy).ascending());
+            } else {
+                pageable = PageRequest.of(Integer.parseInt(page) - 1, Integer.parseInt(limit), Sort.by(sortBy).descending());
+            }
+        } else {
+            pageable = PageRequest.of(Integer.parseInt(page) - 1, Integer.parseInt(limit));
+        }
+        Page<UserEntity> usersPage;
+        //search
+        if (keyword != null && type != null) {
+            String[] types = type.split("-");
+            usersPage = userService.findUsersWithPredicate(keyword, types, pageable, name);
+        } else if (keyword != null) {
+            usersPage = userService.findUsersWithPredicate(keyword, pageable, name);
+        } else {
+            usersPage = userService.findByGroupName(name, pageable);
+        }
+        //response page
+        if (usersPage.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        List<UserDTO> userDTOS = new ArrayList<>();
+        usersPage.forEach(x -> userDTOS.add(userConverter.toDTO(x)));
+        Map<String, Object> response = new HashMap<>();
+        response.put("totalPages", usersPage.getTotalPages());
+        response.put("totalItems", usersPage.getTotalElements());
+        response.put("currentPage", usersPage.getNumber() + 1);
+        response.put("users", userDTOS);
         return ResponseEntity.ok(response);
     }
 }

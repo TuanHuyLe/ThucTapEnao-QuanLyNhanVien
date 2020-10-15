@@ -40,6 +40,9 @@ public final class UserSpecification {
         return (root, query, cb) -> cb.like(cb.lower(root.get(ESearchKey.fullName.name())), "%" + fullName.toLowerCase() + "%");
     }
 
+    public Specification<UserEntity> hasGroupName(String name){
+        return (root, query, cb) -> cb.like(cb.lower(root.get(ESearchKey.group.name()).get(ESearchKey.name.name())), "%" + name.toLowerCase() + "%");
+    }
     /**
      * get user has email
      *
