@@ -2,6 +2,7 @@ package com.enao.team2.quanlynhanvien.controller;
 
 import com.enao.team2.quanlynhanvien.converter.UserConverter;
 import com.enao.team2.quanlynhanvien.dto.AddUserDTO;
+import com.enao.team2.quanlynhanvien.dto.ChangePasswordDTO;
 import com.enao.team2.quanlynhanvien.dto.UserDTO;
 import com.enao.team2.quanlynhanvien.exception.BadRequestException;
 import com.enao.team2.quanlynhanvien.exception.ResourceNotFoundException;
@@ -12,6 +13,7 @@ import com.enao.team2.quanlynhanvien.service.IUserService;
 import com.enao.team2.quanlynhanvien.service.impl.UserDetailsImpl;
 import com.enao.team2.quanlynhanvien.validatation.ValidateUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +23,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -37,6 +42,9 @@ public class UserController {
 
     @Autowired
     UserConverter userConverter;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_USER\")")
     @GetMapping("/user/{id}")
@@ -131,6 +139,28 @@ public class UserController {
         responseMessage.setMessage("Save successfully!");
 
         return new ResponseEntity(userConverter.toDTO(entity), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/user/changePassword")
+    public ResponseEntity<?> changPassword(@RequestBody ChangePasswordDTO changePasswordDTO){
+        UserEntity userEntity;
+        MessageResponse responseMessage = new MessageResponse();
+        UserEntity dataChangePassword = userService.findByUsername(changePasswordDTO.getUserName()).orElseThrow(
+                () -> new ResourceNotFoundException("can not find user with username: "+changePasswordDTO.getUserName())
+        );
+        if(!changePasswordDTO.getOldPassword().equals(passwordEncoder.encode(dataChangePassword.getPassword()))){
+            throw new BadRequestException("Old password is incorrect !");
+        }else{
+            if(changePasswordDTO.getNewPassword().isEmpty()){
+                throw new BadRequestException("New password is required !");
+            }else if (changePasswordDTO.getNewPassword().equals(changePasswordDTO.getOldPassword())){
+                throw new BadRequestException("New password must be unequal with old password");
+            }else{
+                userEntity = userService.save(userConverter.toEntityWhenChangePass(dataChangePassword, changePasswordDTO));
+                responseMessage.setMessage("Save successfully!");
+            }
+        }
+        return new ResponseEntity<>(userConverter.toDTO(userEntity), HttpStatus.OK);
     }
 
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"EDIT_USER\")")
