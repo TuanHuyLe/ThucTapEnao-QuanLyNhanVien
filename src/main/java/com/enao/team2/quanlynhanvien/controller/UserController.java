@@ -11,6 +11,8 @@ import com.enao.team2.quanlynhanvien.messages.ApiError;
 import com.enao.team2.quanlynhanvien.messages.MessageResponse;
 import com.enao.team2.quanlynhanvien.model.UserEntity;
 import com.enao.team2.quanlynhanvien.service.IUserService;
+import com.enao.team2.quanlynhanvien.service.excel.ExcelImporter;
+import com.enao.team2.quanlynhanvien.service.excel.UserExcelExporter;
 import com.enao.team2.quanlynhanvien.service.impl.UserDetailsImpl;
 import com.enao.team2.quanlynhanvien.service.mail.EmailService;
 import com.enao.team2.quanlynhanvien.validatation.ValidateUser;
@@ -26,7 +28,12 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -207,6 +214,32 @@ public class UserController {
         } else {
             throw new ResourceNotFoundException("Can not find user id: " + id);
         }
+    }
+
+    @GetMapping("/user/export/excel")
+    public ResponseEntity<?> exportToExcel(HttpServletResponse response) throws IOException {
+        response.setContentType("application/octet-stream");
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+        String currentDateTime = dateFormatter.format(new Date());
+
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=users_" + currentDateTime + ".xlsx";
+        response.setHeader(headerKey, headerValue);
+
+        List<UserEntity> listUsers = userService.findAll();
+
+        UserExcelExporter excelExporter = new UserExcelExporter(listUsers);
+
+        excelExporter.export(response);
+        return new ResponseEntity<>(new MessageResponse("export successfully"), HttpStatus.OK);
+    }
+
+    @GetMapping("/user/import/excel")
+    public ResponseEntity<List<UserDTO>> importFromExcel(
+            @RequestParam("file") MultipartFile files) throws IOException {
+        ExcelImporter excelImporter = new ExcelImporter(files);
+        List<UserDTO> userDTOs = excelImporter.readBooksFromExcelFile();
+        return ResponseEntity.ok(userDTOs);
     }
 
 }
