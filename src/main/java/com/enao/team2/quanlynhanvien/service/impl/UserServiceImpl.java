@@ -73,6 +73,37 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    public Page<UserEntity> findUsersWithPredicate(String keyword, String[] type, Pageable pageable, String groupName) {
+        Specification<UserEntity> specification = Specification
+                .where(userSpecification.hasUsername(keyword))
+                .or(userSpecification.hasEmail(keyword));
+        for (String t : type) {
+            if (ESearchKey.fullName.name().equals(t)) {
+                //tìm kiếm ko dấu thì chuyển có dấu về ko dấu tìm theo slug
+                if (Constants.VALID_FULL_NAME_REGEX.matcher(keyword).matches()) {
+                    specification = specification.or(userSpecification.hasSlug(keyword)).and(userSpecification.hasGroupName(groupName));
+                } else { // tìm kiếm có dấu thì tìm trực tiếp theo full name
+                    specification = specification.or(userSpecification.hasFullName(keyword)).and(userSpecification.hasGroupName(groupName));
+                }
+            }
+            if (ESearchKey.username.name().equals(t)) {
+                specification = specification.or(userSpecification.hasUsername(keyword)).and(userSpecification.hasGroupName(groupName));
+            }
+            if (ESearchKey.email.name().equals(t)) {
+                specification = specification.or(userSpecification.hasEmail(keyword)).and(userSpecification.hasGroupName(groupName));
+            }
+            else{
+                if (Constants.VALID_FULL_NAME_REGEX.matcher(keyword).matches()) {
+                    specification = specification.or(userSpecification.hasSlug(keyword)).and(userSpecification.hasGroupName(groupName));
+                } else { // tìm kiếm có dấu thì tìm trực tiếp theo full name
+                    specification = specification.or(userSpecification.hasFullName(keyword)).and(userSpecification.hasGroupName(groupName));
+                }
+            }
+        }
+        return userRepository.findAll(specification, pageable);
+    }
+
+    @Override
     public Page<UserEntity> findUsersWithPredicate(String keyword, Pageable pageable) {
         Specification<UserEntity> specification = Specification
                 .where(userSpecification.hasUsername(keyword))
@@ -83,6 +114,22 @@ public class UserServiceImpl implements IUserService {
             specification = specification.or(userSpecification.hasSlug(slugKeyword));
         } else { // tìm kiếm có dấu thì tìm trực tiếp theo full name
             specification = specification.or(userSpecification.hasFullName(keyword));
+        }
+
+        return userRepository.findAll(specification, pageable);
+    }
+
+    @Override
+    public Page<UserEntity> findUsersWithPredicate(String keyword, Pageable pageable, String groupName) {
+        Specification<UserEntity> specification = Specification
+                .where(userSpecification.hasUsername(keyword))
+                .or(userSpecification.hasEmail(keyword));
+        //tìm kiếm ko dấu thì chuyển có dấu về ko dấu tìm theo slug
+        if (Constants.VALID_FULL_NAME_REGEX.matcher(keyword).matches()) {
+            String slugKeyword = slugUtils.slug(keyword);
+            specification = specification.or(userSpecification.hasSlug(slugKeyword)).and(userSpecification.hasGroupName(groupName));
+        } else { // tìm kiếm có dấu thì tìm trực tiếp theo full name
+            specification = specification.or(userSpecification.hasFullName(keyword)).and(userSpecification.hasGroupName(groupName));
         }
 
         return userRepository.findAll(specification, pageable);
@@ -105,4 +152,8 @@ public class UserServiceImpl implements IUserService {
         return dataDelete;
     }
 
+    @Override
+    public Page<UserEntity> findByGroupName(String name, Pageable pageable) {
+        return userRepository.findByGroupName(name, pageable);
+    }
 }
