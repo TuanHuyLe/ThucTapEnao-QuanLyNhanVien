@@ -1,6 +1,7 @@
 package com.enao.team2.quanlynhanvien.converter;
 
 import com.enao.team2.quanlynhanvien.dto.AddUserDTO;
+import com.enao.team2.quanlynhanvien.dto.ChangePasswordDTO;
 import com.enao.team2.quanlynhanvien.dto.UserDTO;
 import com.enao.team2.quanlynhanvien.model.GroupEntity;
 import com.enao.team2.quanlynhanvien.model.PositionEntity;
@@ -136,5 +137,11 @@ public class UserConverter {
         }
         userDTO.setRoleName(roleName);
         return userDTO;
+    }
+
+
+    public UserEntity toEntityWhenChangePass(UserEntity dataChangePassword, ChangePasswordDTO changePasswordDTO) {
+        dataChangePassword.setPassword(BCrypt.hashpw(changePasswordDTO.getNewPassword(), BCrypt.gensalt(12)));
+        return dataChangePassword;
     }
 }
