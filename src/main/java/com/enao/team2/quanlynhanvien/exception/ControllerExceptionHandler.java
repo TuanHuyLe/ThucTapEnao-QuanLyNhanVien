@@ -1,6 +1,6 @@
 package com.enao.team2.quanlynhanvien.exception;
 
-import com.enao.team2.quanlynhanvien.messages.ErrorMessage;
+import com.enao.team2.quanlynhanvien.messages.ApiError;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -22,14 +22,14 @@ public class ControllerExceptionHandler {
      */
     @ExceptionHandler(value = {ResourceNotFoundException.class})
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
-    public ErrorMessage resourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
-        ErrorMessage message = new ErrorMessage(
+    public ApiError resourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
+        ApiError error = new ApiError(
                 LocalDateTime.now(),
                 HttpStatus.NOT_FOUND.value(),
                 ex.getMessage(),
                 request.getDescription(false));
 
-        return message;
+        return error;
     }
 
     /**
@@ -41,8 +41,8 @@ public class ControllerExceptionHandler {
      */
     @ExceptionHandler(value = {UnauthorizedException.class})
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-    public ErrorMessage<String> unauthorizedException(UnauthorizedException ex, WebRequest request) {
-        ErrorMessage<String> message = new ErrorMessage<>(
+    public ApiError unauthorizedException(UnauthorizedException ex, WebRequest request) {
+        ApiError message = new ApiError(
                 LocalDateTime.now(),
                 HttpStatus.UNAUTHORIZED.value(),
                 ex.getMessage(),
@@ -60,8 +60,8 @@ public class ControllerExceptionHandler {
      */
     @ExceptionHandler(value = {ForbiddenException.class})
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
-    public ErrorMessage<String> forbiddenException(ForbiddenException ex, WebRequest request) {
-        ErrorMessage<String> message = new ErrorMessage<>(
+    public ApiError forbiddenException(ForbiddenException ex, WebRequest request) {
+        ApiError message = new ApiError(
                 LocalDateTime.now(),
                 HttpStatus.FORBIDDEN.value(),
                 ex.getMessage(),
@@ -79,8 +79,8 @@ public class ControllerExceptionHandler {
      */
     @ExceptionHandler(value = {InternalServerErrorException.class})
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorMessage<String> internalServerErrorException(InternalServerErrorException ex, WebRequest request) {
-        ErrorMessage<String> message = new ErrorMessage<>(
+    public ApiError internalServerErrorException(InternalServerErrorException ex, WebRequest request) {
+        ApiError message = new ApiError(
                 LocalDateTime.now(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 ex.getMessage(),
@@ -98,8 +98,8 @@ public class ControllerExceptionHandler {
      */
     @ExceptionHandler(value = {BadRequestException.class})
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public ErrorMessage<String> badRequestException(BadRequestException ex, WebRequest request) {
-        ErrorMessage<String> message = new ErrorMessage<>(
+    public ApiError badRequestException(BadRequestException ex, WebRequest request) {
+        ApiError message = new ApiError(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
                 ex.getMessage(),

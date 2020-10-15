@@ -2,10 +2,11 @@ package com.enao.team2.quanlynhanvien.controller;
 
 import com.enao.team2.quanlynhanvien.constants.RedisKey;
 import com.enao.team2.quanlynhanvien.exception.UnauthorizedException;
+import com.enao.team2.quanlynhanvien.messages.ApiError;
 import com.enao.team2.quanlynhanvien.messages.JwtResponse;
 import com.enao.team2.quanlynhanvien.dto.LoginDTO;
-import com.enao.team2.quanlynhanvien.messages.MessageResponse;
 import com.enao.team2.quanlynhanvien.utils.JwtUtils;
+import com.enao.team2.quanlynhanvien.validatation.ValidateLogin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -38,6 +42,16 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginDTO loginRequest) {
+        List<String> error = ValidateLogin.check(loginRequest);
+        if (!error.isEmpty()) {
+            ApiError errorMessage = new ApiError(
+                    LocalDateTime.now(),
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Login failed!",
+                    error
+            );
+            return ResponseEntity.badRequest().body(errorMessage);
+        }
         String jwt;
         //authenticate
         Authentication authentication;

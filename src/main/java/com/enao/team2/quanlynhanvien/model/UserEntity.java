@@ -2,6 +2,7 @@ package com.enao.team2.quanlynhanvien.model;
 
 import lombok.*;
 import org.hibernate.annotations.Where;
+import org.springframework.validation.annotation.Validated;
 
 import javax.persistence.*;
 import java.util.HashSet;

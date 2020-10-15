@@ -1,5 +1,7 @@
 package com.enao.team2.quanlynhanvien.constants;
 
+import org.springframework.data.domain.Page;
+
 import java.util.regex.Pattern;
 
 public class Constants {
@@ -7,10 +9,12 @@ public class Constants {
     //regex
     public static final Pattern VALID_EMAIL_ADDRESS_REGEX =
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
-    public static final Pattern VALID_USERNAME_REGEX =
-            Pattern.compile("\\w+", Pattern.CASE_INSENSITIVE);
+    public static final Pattern VALID_USERNAME_PASSWORD_REGEX =
+            Pattern.compile("[!@#$%&*\\w+]+", Pattern.CASE_INSENSITIVE);
     public static final Pattern VALID_FULL_NAME_REGEX =
-            Pattern.compile("[a-zA-Z0-9\\s]+", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("[!@#$%&*\\w+\\d]+", Pattern.CASE_INSENSITIVE);
+    public static final Pattern VALID_FULL_NAME_NOT_EMPTY_REGEX =
+            Pattern.compile("\\s+", Pattern.CASE_INSENSITIVE);
 
     //role
     public static final String ROLE_GUEST = "GUEST";

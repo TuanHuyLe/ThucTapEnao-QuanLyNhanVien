@@ -4,7 +4,7 @@ import com.enao.team2.quanlynhanvien.constants.Constants;
 import com.enao.team2.quanlynhanvien.dto.EmailDTO;
 import com.enao.team2.quanlynhanvien.exception.BadRequestException;
 import com.enao.team2.quanlynhanvien.messages.MessageResponse;
-import com.enao.team2.quanlynhanvien.service.mail.EmailService;
+import com.enao.team2.quanlynhanvien.service.IMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class AdminController {
 
     @Autowired
-    private EmailService emailService;
+    private IMessageService<EmailDTO> emailService;
 
     @GetMapping("/list")
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"" +
@@ -40,7 +40,7 @@ public class AdminController {
      */
     @PostMapping("/email")
     public ResponseEntity<?> sendEmail(@RequestBody EmailDTO emailDTO) {
-        if (emailService.sendMail(emailDTO)) {
+        if (emailService.sendMessage(emailDTO)) {
             return ResponseEntity.ok(new MessageResponse("Sent email"));
         }
         throw new BadRequestException("Email is invalid!");

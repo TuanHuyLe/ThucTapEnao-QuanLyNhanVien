@@ -5,7 +5,7 @@ import com.enao.team2.quanlynhanvien.dto.AddUserDTO;
 import com.enao.team2.quanlynhanvien.dto.UserDTO;
 import com.enao.team2.quanlynhanvien.exception.BadRequestException;
 import com.enao.team2.quanlynhanvien.exception.ResourceNotFoundException;
-import com.enao.team2.quanlynhanvien.messages.ErrorMessage;
+import com.enao.team2.quanlynhanvien.messages.ApiError;
 import com.enao.team2.quanlynhanvien.messages.MessageResponse;
 import com.enao.team2.quanlynhanvien.model.UserEntity;
 import com.enao.team2.quanlynhanvien.service.IUserService;
@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -89,19 +90,17 @@ public class UserController {
     }
 
     @PostMapping("/user")
-    public ResponseEntity<?> add(@RequestBody AddUserDTO addUserDTO, HttpServletResponse response) {
+    public ResponseEntity<?> add(@RequestBody AddUserDTO addUserDTO) {
         UserEntity entity;
         MessageResponse responseMessage = new MessageResponse();
         List<String> error = ValidateUser.check(addUserDTO);
         if (!error.isEmpty()) {
-            ErrorMessage<List<String>> errorMessage = new ErrorMessage<>(
+            ApiError errorMessage = new ApiError(
                     LocalDateTime.now(),
                     HttpStatus.BAD_REQUEST.value(),
-                    error,
-                    ""
+                    "Add user failed!",
+                    error
             );
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.setContentType("application/json");
             return ResponseEntity.badRequest().body(errorMessage);
         }
         Optional<UserEntity> userEntity = userService.findByUsername(addUserDTO.getUsername());

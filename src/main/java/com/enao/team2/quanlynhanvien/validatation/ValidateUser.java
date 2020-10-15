@@ -11,11 +11,17 @@ public class ValidateUser {
         List<String> error = new ArrayList<>();
         if (userDTO.getUsername().length() < 3) {
             error.add("Length of username must greater than 3 character!");
+        } else if (Constants.VALID_USERNAME_PASSWORD_REGEX.matcher(userDTO.getUsername()).matches()) {
+            error.add("Username is invalid!");
         }
         if (userDTO.getPassword().length() < 6) {
             error.add("Length of password must greater than 6 character!");
+        } else if (Constants.VALID_USERNAME_PASSWORD_REGEX.matcher(userDTO.getPassword()).matches()) {
+            error.add("Password is invalid!");
         }
-        if (userDTO.getFullName() == null || userDTO.getFullName().isEmpty()) {
+        if (userDTO.getFullName() == null
+                || Constants.VALID_FULL_NAME_NOT_EMPTY_REGEX.matcher(userDTO.getFullName()).matches()
+                || userDTO.getFullName().isEmpty()) {
             error.add("Full name is required!");
         }
         if (userDTO.getGender() == null) {
