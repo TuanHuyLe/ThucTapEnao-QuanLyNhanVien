@@ -11,6 +11,8 @@ import com.enao.team2.quanlynhanvien.messages.ApiError;
 import com.enao.team2.quanlynhanvien.messages.MessageResponse;
 import com.enao.team2.quanlynhanvien.model.UserEntity;
 import com.enao.team2.quanlynhanvien.service.IUserService;
+import com.enao.team2.quanlynhanvien.service.excel.ExcelImporter;
+import com.enao.team2.quanlynhanvien.service.excel.UserExcelExporter;
 import com.enao.team2.quanlynhanvien.service.impl.UserDetailsImpl;
 import com.enao.team2.quanlynhanvien.service.mail.EmailService;
 import com.enao.team2.quanlynhanvien.validatation.ValidateUser;
@@ -26,7 +28,12 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -173,11 +180,15 @@ public class UserController {
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"EDIT_USER\")")
     @PutMapping("/user")
     public ResponseEntity<?> updateUser(@RequestBody UserDTO userRequest) {
+        //check user update is exists by id
         UserEntity dataMustBeUpdate = userService.findById(userRequest.getId()).orElseThrow(
                 () -> new ResourceNotFoundException("Can not update user with id: " + userRequest.getId())
         );
+        //check new username equal old username
         if (!dataMustBeUpdate.getUsername().equals(userRequest.getUsername())) {
+            //find user* by new username
             Optional<UserEntity> user = userService.findByUsername(userRequest.getUsername());
+            //username is exists if user* is exists and new username equal username in user*
             if (user.isPresent() && user.get().getUsername().equals(userRequest.getUsername())) {
                 throw new BadRequestException("Username is exists!");
             }
@@ -186,8 +197,7 @@ public class UserController {
 
         UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<String> rolesName = user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
-        boolean isAdmin = rolesName.contains("ROLE_FULL");
-        if (isAdmin) {
+        if (rolesName.contains("ROLE_FULL")) {
             userEntity.setPassword(dataMustBeUpdate.getPassword());
         } else {
             userEntity.setPassword(dataMustBeUpdate.getPassword());
@@ -209,4 +219,41 @@ public class UserController {
         }
     }
 
+    /**
+     * export excel users
+     *
+     * @param response
+     * @throws IOException
+     */
+    @GetMapping("/user/export/excel")
+    public void exportToExcel(HttpServletResponse response) throws IOException {
+        response.setContentType("application/octet-stream");
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+        String currentDateTime = dateFormatter.format(new Date());
+
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=users_" + currentDateTime + ".xlsx";
+        response.setHeader(headerKey, headerValue);
+
+        List<UserEntity> listUsers = userService.findAll();
+
+        UserExcelExporter excelExporter = new UserExcelExporter(listUsers);
+
+        excelExporter.export(response);
+    }
+
+    /**
+     * import excel users
+     *
+     * @param files
+     * @return
+     * @throws IOException
+     */
+    @GetMapping("/user/import/excel")
+    public ResponseEntity<List<UserDTO>> importFromExcel(
+            @RequestParam("file") MultipartFile files) throws IOException {
+        ExcelImporter excelImporter = new ExcelImporter(files);
+        List<UserDTO> userDTOs = excelImporter.readBooksFromExcelFile();
+        return ResponseEntity.ok(userDTOs);
+    }
 }
