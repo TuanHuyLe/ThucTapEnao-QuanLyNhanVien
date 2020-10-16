@@ -32,19 +32,19 @@ public class ExcelImporter {
 
         XSSFWorkbook workbook = new XSSFWorkbook(multipartFile.getInputStream());
         XSSFSheet firstSheet = workbook.getSheetAt(0);
-
         for (int index = 0; index < firstSheet.getPhysicalNumberOfRows(); index++) {
             UserDTO userDTO = new UserDTO();
             XSSFRow row = firstSheet.getRow(index);
-            String fullName = row.getCell(2).getStringCellValue();
             userDTO.setId(UUID.fromString(row.getCell(0).getStringCellValue()));
             userDTO.setUsername(row.getCell(1).getStringCellValue());
+            String fullName = row.getCell(2).getStringCellValue();
             userDTO.setFullName(fullName);
             userDTO.setGender("Male".equals(row.getCell(3).getStringCellValue()));
             userDTO.setEmail(row.getCell(4).getStringCellValue());
             userDTO.setActive("Active".equals(row.getCell(5).getStringCellValue()));
             userDTO.setSlug(slugUtils.slug(fullName));
             userDTO.setGroupName(row.getCell(6).getStringCellValue());
+            userDTO.setPositionName(row.getCell(7).getStringCellValue());
             users.add(userDTO);
         }
 

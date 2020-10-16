@@ -67,7 +67,7 @@ public class PositionController {
         response.put("totalPages", positionPage.getTotalPages());
         response.put("totalItems", positionPage.getTotalElements());
         response.put("currentPage", positionPage.getNumber() + 1);
-        response.put("groups", positionDTOS);
+        response.put("position", positionDTOS);
         return ResponseEntity.ok(response);
     }
 

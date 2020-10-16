@@ -11,12 +11,12 @@ public class ValidateUser {
         List<String> error = new ArrayList<>();
         if (userDTO.getUsername().length() < 3) {
             error.add("Length of username must greater than 3 character!");
-        } else if (Constants.VALID_USERNAME_PASSWORD_REGEX.matcher(userDTO.getUsername()).matches()) {
+        } else if (!Constants.VALID_USERNAME_PASSWORD_REGEX.matcher(userDTO.getUsername()).matches()) {
             error.add("Username is invalid!");
         }
         if (userDTO.getPassword().length() < 6) {
             error.add("Length of password must greater than 6 character!");
-        } else if (Constants.VALID_USERNAME_PASSWORD_REGEX.matcher(userDTO.getPassword()).matches()) {
+        } else if (!Constants.VALID_USERNAME_PASSWORD_REGEX.matcher(userDTO.getPassword()).matches()) {
             error.add("Password is invalid!");
         }
         if (userDTO.getFullName() == null
@@ -33,9 +33,9 @@ public class ValidateUser {
         if (userDTO.getPositionName() == null) {
             error.add("Position is required!");
         }
-        if(userDTO.getRoleName().size() ==0){
-            error.add("Role name is required!");
-        }
+//        if(userDTO.getRoleName().size() ==0){
+//            error.add("Role name is required!");
+//        }
         return error;
     }
 }

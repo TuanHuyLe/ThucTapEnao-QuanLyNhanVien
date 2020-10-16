@@ -82,37 +82,6 @@ public class HomeController {
     }
 
     /*
-     * export excel
-     */
-    @GetMapping("/users/export/excel")
-    public void exportToExcel(HttpServletResponse response) throws IOException {
-        response.setContentType("application/octet-stream");
-        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
-        String currentDateTime = dateFormatter.format(new Date());
-
-        String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=users_" + currentDateTime + ".xlsx";
-        response.setHeader(headerKey, headerValue);
-
-        List<UserEntity> listUsers = userService.findAll();
-
-        UserExcelExporter excelExporter = new UserExcelExporter(listUsers);
-
-        excelExporter.export(response);
-    }
-
-    /*
-     * import excel
-     */
-    @GetMapping("/users/import/excel")
-    public ResponseEntity<List<UserDTO>> importFromExcel(
-            @RequestParam("file") MultipartFile files) throws IOException {
-        ExcelImporter excelImporter = new ExcelImporter(files);
-        List<UserDTO> userDTOs = excelImporter.readBooksFromExcelFile();
-        return ResponseEntity.ok(userDTOs);
-    }
-
-    /*
      * test search by criteria builder
      */
     @GetMapping("/search")
@@ -145,4 +114,39 @@ public class HomeController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * export excel users
+     * @param response
+     * @throws IOException
+     */
+    @GetMapping("/user/export/excel")
+    public void exportToExcel(HttpServletResponse response) throws IOException {
+        response.setContentType("application/octet-stream");
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+        String currentDateTime = dateFormatter.format(new Date());
+
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=users_" + currentDateTime + ".xlsx";
+        response.setHeader(headerKey, headerValue);
+
+        List<UserEntity> listUsers = userService.findAll();
+
+        UserExcelExporter excelExporter = new UserExcelExporter(listUsers);
+
+        excelExporter.export(response);
+    }
+
+    /**
+     * import excel users
+     * @param files
+     * @return
+     * @throws IOException
+     */
+    @GetMapping("/user/import/excel")
+    public ResponseEntity<List<UserDTO>> importFromExcel(
+            @RequestParam("file") MultipartFile files) throws IOException {
+        ExcelImporter excelImporter = new ExcelImporter(files);
+        List<UserDTO> userDTOs = excelImporter.readBooksFromExcelFile();
+        return ResponseEntity.ok(userDTOs);
+    }
 }

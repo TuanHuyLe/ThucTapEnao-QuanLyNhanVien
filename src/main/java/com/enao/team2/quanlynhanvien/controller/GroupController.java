@@ -45,7 +45,6 @@ public class GroupController {
 
     @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
     @GetMapping("/group/{id}")
-
     public ResponseEntity<GroupDTO> getOne(@PathVariable UUID id) {
         GroupEntity groupEntity = groupService.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Not found group with id: " + id.toString()));
@@ -165,6 +164,7 @@ public class GroupController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("@appAuthorizer.authorize(authentication, \"VIEW_GROUP\")")
     @GetMapping("/group/{name}/user")
     public ResponseEntity<?> listByGroupId(
             @PathVariable(value = "name") String name,

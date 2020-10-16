@@ -41,11 +41,11 @@ public class UserConverter {
 
     public UserEntity toEntity(UserDTO userDTO) {
         Optional<PositionEntity> positionEntity = positionService.findByName(userDTO.getPositionName());
-        Optional<GroupEntity> groupEntity = groupService.findByName(userDTO.getPositionName());
+        Optional<GroupEntity> groupEntity = groupService.findByName(userDTO.getGroupName());
         UserEntity userEntity = new UserEntity();
-        if(userDTO.getId() == null){
+        if (userDTO.getId() == null) {
             userEntity.setId(UUID.randomUUID());
-        }else{
+        } else {
             userEntity.setId(userDTO.getId());
         }
         userEntity.setUsername(userDTO.getUsername());
@@ -63,18 +63,20 @@ public class UserConverter {
         } else {
             userEntity.setGender(true);
         }
-        if(positionEntity.isPresent()){
+        if (positionEntity.isPresent()) {
             userEntity.setPositions(positionEntity.get());
         }
-        if(groupEntity.isPresent()){
+        if (groupEntity.isPresent()) {
             userEntity.setGroup(groupEntity.get());
         }
-        Set<RoleEntity> roleEntities = new HashSet<>();
-        for(String roleName : userDTO.getRoleName()){
-            RoleEntity roleEntity = roleService.findByName(roleName).get();
-            roleEntities.add(roleEntity);
+        if (!userDTO.getRoleName().isEmpty()) {
+            Set<RoleEntity> roleEntities = new HashSet<>();
+            for (String roleName : userDTO.getRoleName()) {
+                RoleEntity roleEntity = roleService.findByName(roleName).get();
+                roleEntities.add(roleEntity);
+            }
+            userEntity.setRoles(roleEntities);
         }
-        userEntity.setRoles(roleEntities);
         return userEntity;
     }
 
@@ -99,26 +101,31 @@ public class UserConverter {
         } else {
             userEntity.setGender(true);
         }
-        if(positionEntity.isPresent()){
+        if (positionEntity.isPresent()) {
             userEntity.setPositions(positionEntity.get());
         }
-        if(groupEntity.isPresent()) {
+        if (groupEntity.isPresent()) {
             userEntity.setGroup(groupEntity.get());
         }
         Set<RoleEntity> roleEntities = new HashSet<>();
-        for(String roleName : userDTO.getRoleName()){
-            RoleEntity roleEntity = roleService.findByName(roleName).get();
+        if (userDTO.getRoleName() == null) {
+            RoleEntity roleEntity = roleService.findByName("ROLE_FULL").get();
             roleEntities.add(roleEntity);
+        } else {
+            for (String roleName : userDTO.getRoleName()) {
+                RoleEntity roleEntity = roleService.findByName(roleName).get();
+                roleEntities.add(roleEntity);
+            }
         }
         userEntity.setRoles(roleEntities);
         return userEntity;
     }
 
     public UserDTO toDTO(UserEntity userEntity) {
-        Set<RoleEntity> userEntityRoles= userEntity.getRoles();
+        Set<RoleEntity> userEntityRoles = userEntity.getRoles();
         List<RoleEntity> list = new ArrayList<>(userEntityRoles);
         List<String> roleName = new ArrayList<>();
-        for (RoleEntity roleEntity : list){
+        for (RoleEntity roleEntity : list) {
             roleName.add(roleEntity.getName());
         }
         UserDTO userDTO = new UserDTO();
